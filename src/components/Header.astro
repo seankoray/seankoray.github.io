@@ -1,0 +1,40 @@
+---
+import { localePath, navItems, type Locale, type Section } from '../lib/i18n';
+
+interface Props {
+	locale: Locale;
+	currentSection?: Section;
+	languageHref: string;
+}
+
+const { locale, currentSection, languageHref } = Astro.props;
+const navLabel = locale === 'en' ? 'Primary navigation' : '主导航';
+const languageLabel = locale === 'en' ? '切换至中文' : 'Switch to English';
+---
+
+<header class="site-header">
+	<div class="header-inner container">
+		<a class="brand" href={localePath(locale, '/')} aria-label={locale === 'en' ? 'Ray, home' : 'Ray，首页'}>
+			<span>Ray</span><span class="brand-mark" aria-hidden="true">·</span>
+		</a>
+		<div class="header-actions">
+			<nav aria-label={navLabel}>
+				<ul class="nav-list">
+					{navItems[locale].map((item) => (
+						<li>
+							<a
+								href={localePath(locale, item.path)}
+								aria-current={currentSection === item.key ? 'page' : undefined}
+							>
+								{item.label}
+							</a>
+						</li>
+					))}
+				</ul>
+			</nav>
+			<a class="language-link" href={languageHref} lang={locale === 'en' ? 'zh-CN' : 'en'} aria-label={languageLabel}>
+				{locale === 'en' ? '中文' : 'EN'}
+			</a>
+		</div>
+	</div>
+</header>

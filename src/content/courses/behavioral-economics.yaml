@@ -1,0 +1,35 @@
+order: 1
+title:
+  en: Behavioral Economics
+  zh: 行为经济学
+description:
+  en: A topical course covering consumer decision-making, inequality, and experimental methods.
+  zh: 一门涵盖消费者决策、不平等与实验方法的专题课程。
+resources:
+  - path: tutorial-01.html
+    order: 1
+    title:
+      en: Introduction to Behavioral Economics and Online Experiments
+      zh: 行为经济学与在线实验入门
+    description:
+      en: An introduction to economic questions, behavioral biases, causal inference, and online experiments.
+      zh: 介绍经济学问题、行为偏差、因果推断与在线实验。
+    updated: "2026-07-15"
+  - path: tutorial-02.html
+    order: 2
+    title:
+      en: Reading Shades of Green Behaviour
+      zh: 精读 Shades of Green Behaviour
+    description:
+      en: A guided reading on psychological distance, social factors, and green behavior.
+      zh: 围绕心理距离、社会因素与绿色行为的论文精读。
+    updated: "2026-07-15"
+  - path: tutorial-03.html
+    order: 3
+    title:
+      en: "Reading Regression Tables: From OLS to Tobit"
+      zh: "读懂回归表：从 OLS 到 Tobit"
+    description:
+      en: A guide to variables, coefficients, statistical inference, multiple regression, scales, and Tobit models.
+      zh: 介绍变量、系数、统计推断、多元回归、问卷量表与 Tobit 模型。
+    updated: "2026-07-14"

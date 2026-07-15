@@ -1,0 +1,62 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { courseSlug } from '../lib/courses';
+import type { Locale } from '../lib/i18n';
+
+interface Props {
+	course: CollectionEntry<'courses'>;
+	locale: Locale;
+}
+
+const { course, locale } = Astro.props;
+const slug = courseSlug(course.id);
+const resources = [...course.data.resources].sort((a, b) => a.order - b.order || a.path.localeCompare(b.path));
+const emptyTitle = locale === 'en' ? 'Materials are being prepared.' : '课程资料正在整理中。';
+const emptyCopy = locale === 'en'
+	? 'New materials will appear on this page when they are available.'
+	: '新资料发布后将在本页显示。';
+const openLabel = locale === 'en' ? 'Open material' : '打开资料';
+
+function materialUrl(path: string) {
+	return `/materials/${slug}/${path.split('/').map(encodeURIComponent).join('/')}`;
+}
+
+function formatDate(value: string) {
+	return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'zh-CN', {
+		year: 'numeric',
+		month: 'short',
+		day: 'numeric',
+		timeZone: 'UTC',
+	}).format(new Date(`${value}T00:00:00Z`));
+}
+---
+
+{resources.length === 0 ? (
+	<div class="empty-state">
+		<p class="empty-title">{emptyTitle}</p>
+		<p>{emptyCopy}</p>
+	</div>
+) : (
+	<ol class="resource-list">
+		{resources.map((resource, index) => (
+			<li class="resource-item">
+				<div class="resource-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+				<div class="resource-body">
+					<div class="resource-heading">
+						<h2>{resource.title[locale]}</h2>
+						{resource.updated && <time datetime={resource.updated}>{formatDate(resource.updated)}</time>}
+					</div>
+					{resource.description && <p>{resource.description[locale]}</p>}
+					<a
+						class="text-link"
+						href={materialUrl(resource.path)}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{openLabel}<span aria-hidden="true"> ↗</span>
+					</a>
+				</div>
+			</li>
+		))}
+	</ol>
+)}

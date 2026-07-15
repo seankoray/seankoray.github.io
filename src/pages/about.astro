@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { profile } from '../lib/i18n';
+---
+
+<BaseLayout
+	locale="en"
+	title="About"
+	description="About Ray, a PhD student in Economics at Renmin University of China."
+	currentSection="about"
+	alternatePath="/zh/about/"
+>
+	<header class="page-header container">
+		<p class="eyebrow">About</p>
+		<h1>Economics, labor, and development.</h1>
+		<p class="page-intro">{profile.research.en}</p>
+	</header>
+
+	<section class="section">
+		<div class="section-grid container">
+			<p class="section-label">Profile</p>
+			<div class="prose">
+				<h2>Ray</h2>
+				<p>Ray is a PhD student in Economics at {profile.affiliation.en}.</p>
+				<p>Research interests center on {profile.research.en.charAt(0).toLowerCase() + profile.research.en.slice(1)}</p>
+			</div>
+		</div>
+	</section>
+</BaseLayout>

@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import ResourceList from '../../components/ResourceList.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { courseSlug, getCourses } from '../../lib/courses';
+
+export async function getStaticPaths() {
+	const courses = await getCourses();
+	return courses.map((course) => ({
+		params: { course: courseSlug(course.id) },
+		props: { course },
+	}));
+}
+
+interface Props {
+	course: CollectionEntry<'courses'>;
+}
+
+const { course } = Astro.props;
+const slug = courseSlug(course.id);
+---
+
+<BaseLayout
+	locale="en"
+	title={course.data.title.en}
+	description={course.data.description.en}
+	currentSection="teaching"
+	alternatePath={`/zh/teaching/${slug}/`}
+>
+	<header class="page-header container">
+		<p class="eyebrow">Teaching</p>
+		<h1>{course.data.title.en}</h1>
+		<p class="page-intro">{course.data.description.en}</p>
+	</header>
+
+	<section class="section">
+		<div class="section-grid container">
+			<p class="section-label">Materials</p>
+			<ResourceList course={course} locale="en" />
+		</div>
+	</section>
+</BaseLayout>

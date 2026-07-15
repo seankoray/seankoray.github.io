@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { profile } from '../lib/i18n';
+---
+
+<BaseLayout
+	locale="en"
+	title="Contact"
+	description="Contact Ray about academic and teaching matters."
+	currentSection="contact"
+	alternatePath="/zh/contact/"
+>
+	<header class="page-header container">
+		<p class="eyebrow">Contact</p>
+		<h1>Academic and teaching inquiries.</h1>
+		<p class="page-intro">For academic and teaching inquiries, contact:</p>
+		<a class="contact-email" href={`mailto:${profile.email}`}>{profile.email}</a>
+	</header>
+</BaseLayout>

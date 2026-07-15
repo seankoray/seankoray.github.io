@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Caferra, Morone & Morone (2026) 论文精读课件：心理距离、社会因素与三类绿色行为。">
+  <title>Tutorial 02｜精读 Shades of Green Behaviour</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Noto+Sans+SC:wght@400;500;600;700;900&amp;family=Noto+Serif+SC:wght@600;700;900&amp;display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --stage-bg: #292929;
+      --slide-bg: #292929;
+      --paper: #f8f6f1;
+      --paper-deep: #eeeae0;
+      --ink: #191a18;
+      --muted: #666a65;
+      --blue: #214e73;
+      --blue-soft: #e3edf5;
+      --green: #397a68;
+      --green-soft: #dcece6;
+      --red: #c84b49;
+      --red-soft: #f4dfdc;
+      --gold: #d6a84b;
+      --gold-soft: #f5e9c9;
+      --lavender: #c7b8ea;
+      --pink: #f4b8c5;
+      --sky: #a8d8ea;
+      --mint: #98d4bb;
+      --cream: #ffe6a7;
+      --font-display: "Bodoni Moda", "Noto Serif SC", serif;
+      --font-cjk-display: "Noto Serif SC", serif;
+      --font-body: "DM Sans", "Noto Sans SC", sans-serif;
+      --ease-out: cubic-bezier(.16, 1, .3, 1);
+      --shadow: 0 28px 72px rgba(0,0,0,.28);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button { font: inherit; }
+
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+    .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+    .deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+    .slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+    .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+    img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+    .deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+
+    @media print {
+      html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+      .deck-viewport { position: static; overflow: visible; background: #fff; }
+      .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+      .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+      .slide:last-child { break-after: auto; page-break-after: auto; }
+      .deck-controls { display: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+    }
+
+    /* === NOTEBOOK PAPER SYSTEM === */
+    .paper {
+      position: absolute;
+      inset: 58px 88px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, transparent 0 104px, rgba(200,75,73,.14) 104px 107px, transparent 107px),
+        repeating-linear-gradient(0deg, transparent 0 56px, rgba(33,78,115,.05) 57px 58px),
+        var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .paper::after {
+      content: "";
+      position: absolute;
+      z-index: 8;
+      left: 22px;
+      top: 36px;
+      bottom: 36px;
+      width: 58px;
+      background: radial-gradient(circle, #292929 0 12px, #e7e3da 13px 20px, transparent 21px);
+      background-size: 58px 178px;
+      background-position: center 0;
+      pointer-events: none;
+    }
+    .slide::after {
+      content: attr(data-tab);
+      position: absolute;
+      right: 38px;
+      top: 170px;
+      z-index: 10;
+      width: 54px;
+      min-height: 174px;
+      padding: 20px 0;
+      border-radius: 0 18px 18px 0;
+      background: var(--tab-color, var(--mint));
+      color: #263332;
+      writing-mode: vertical-rl;
+      display: grid;
+      place-items: center;
+      font: 700 20px var(--font-body);
+      letter-spacing: .08em;
+    }
+    .title-slide::after { display: none; }
+    .content {
+      position: absolute;
+      inset: 54px 82px 76px 140px;
+      z-index: 2;
+      font-family: var(--font-body);
+      color: var(--ink);
+    }
+    .slide-title {
+      font: 900 66px/1.15 var(--font-cjk-display);
+      letter-spacing: -.035em;
+      color: var(--ink);
+      margin-bottom: 26px;
+    }
+    .slide-title .en { font: 600 28px var(--font-body); color: var(--green); letter-spacing: .02em; margin-left: 18px; }
+    .eyebrow { font: 700 18px var(--font-body); letter-spacing: .15em; text-transform: uppercase; color: var(--green); margin-bottom: 16px; }
+    .lead { font: 500 34px/1.55 var(--font-body); color: #323532; max-width: 1430px; }
+    .big-idea { font: 900 76px/1.2 var(--font-cjk-display); letter-spacing: -.04em; }
+    .number { font: 700 92px/1 var(--font-display); color: var(--red); }
+    .muted { color: var(--muted); }
+    .small { font-size: 21px; line-height: 1.5; }
+    .source { position: absolute; left: 140px; bottom: 23px; z-index: 3; font: 500 17px var(--font-body); color: #777b75; }
+    .auto-footer { position: absolute; right: 82px; bottom: 22px; z-index: 4; font: 600 17px var(--font-body); color: #777b75; }
+    .accent-rule { width: 126px; height: 7px; background: var(--red); margin: 28px 0; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+    .stack { display: grid; gap: 18px; }
+    .center { display: grid; place-items: center; text-align: center; }
+    .card { background: rgba(255,255,255,.68); border: 2px solid #ded9cf; border-radius: 20px; padding: 26px 28px; box-shadow: 0 8px 22px rgba(40,38,33,.05); }
+    .card h3 { font: 800 30px/1.25 var(--font-body); margin-bottom: 12px; color: var(--blue); }
+    .card p, .card li { font: 500 25px/1.5 var(--font-body); }
+    .card.green { background: var(--green-soft); border-color: #bad9ce; }
+    .card.blue { background: var(--blue-soft); border-color: #bfd4e5; }
+    .card.red { background: var(--red-soft); border-color: #e6c0bb; }
+    .card.gold { background: var(--gold-soft); border-color: #e8d39d; }
+    .callout { border-left: 9px solid var(--red); padding: 20px 28px; background: rgba(244,223,220,.65); font: 700 30px/1.45 var(--font-body); }
+    .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 2px solid #cbc7bd; border-radius: 999px; background: #fffdf9; font: 700 20px var(--font-body); }
+    .chip.key { border-color: var(--green); color: var(--green); }
+    .arrow { font-size: 40px; color: var(--red); }
+    ul.clean { list-style: none; display: grid; gap: 16px; }
+    ul.clean li { position: relative; padding-left: 32px; font: 500 27px/1.45 var(--font-body); }
+    ul.clean li::before { content: "◆"; position: absolute; left: 0; top: 4px; font-size: 16px; color: var(--green); }
+    .formula { display: inline-flex; align-items: center; gap: 18px; padding: 18px 28px; background: #fffdf9; border: 2px solid #d8d2c6; border-radius: 18px; font: 600 38px var(--font-body); letter-spacing: .02em; }
+    .formula .beta { font: 700 54px var(--font-display); color: var(--red); }
+    .equals { color: #8b8e89; }
+
+    /* === TABLES === */
+    .reg-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.72); font: 500 20px/1.25 var(--font-body); }
+    .reg-table th, .reg-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #ded9d0; }
+    .reg-table th:first-child, .reg-table td:first-child { text-align: left; font-weight: 700; }
+    .reg-table thead tr:first-child { border-top: 3px solid var(--ink); }
+    .reg-table thead tr:last-child { border-bottom: 2px solid var(--ink); }
+    .reg-table tbody tr:last-child { border-bottom: 3px solid var(--ink); }
+    .reg-table .se { color: var(--muted); font-size: .86em; }
+    .reg-table .sig { color: var(--red); font-weight: 900; }
+    .reg-table .focus { background: #fff0b8; color: #111; }
+    .dense-table { font-size: 16px; }
+    .dense-table th, .dense-table td { padding: 7px 8px; }
+
+    /* === DATA TABLE STYLE (for table-style content) === */
+    .data-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.7); font: 500 22px/1.35 var(--font-body); }
+    .data-table th { background: var(--blue-soft); font: 800 22px var(--font-body); color: var(--blue); padding: 14px 18px; text-align: left; border-bottom: 2px solid var(--blue); }
+    .data-table td { padding: 12px 18px; border-bottom: 1px solid #ded9d0; vertical-align: top; }
+    .data-table tr:nth-child(even) td { background: rgba(255,255,255,.4); }
+
+    /* === PLOT CARD === */
+    .plot-card { position: relative; background: rgba(255,255,255,.66); border: 2px solid #dcd7cd; border-radius: 24px; padding: 24px; }
+    .image-frame { background: rgba(255,255,255,.78); border: 2px solid #dcd7cd; border-radius: 22px; padding: 22px; display: grid; place-items: center; }
+    .image-frame img { max-width: 100%; max-height: 720px; object-fit: contain; border-radius: 8px; }
+
+    /* === TIMELINES, STEPS === */
+    .steps { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; margin-top: 35px; }
+    .step { min-height: 214px; border-radius: 22px; padding: 22px 18px; background: #fffdf9; border: 2px solid #dcd7cd; }
+    .step b { display: block; font: 700 45px var(--font-display); color: var(--red); margin-bottom: 10px; }
+    .step h3 { font: 800 24px var(--font-body); margin-bottom: 8px; color: var(--blue); }
+    .step p { font: 500 20px/1.42 var(--font-body); color: #515550; }
+    .flow { display: flex; align-items: stretch; justify-content: center; gap: 18px; margin-top: 30px; }
+    .flow-node { width: 360px; min-height: 210px; border-radius: 24px; background: #fffdf9; border: 3px solid #d7d1c5; padding: 26px; text-align: center; }
+    .flow-node h3 { font: 800 31px var(--font-body); color: var(--blue); margin-bottom: 12px; }
+    .flow-node p { font: 500 23px/1.5 var(--font-body); }
+
+    /* === BUTTONS === */
+    .action { cursor: pointer; border: 0; border-radius: 999px; padding: 13px 22px; background: var(--blue); color: white; font: 700 20px var(--font-body); box-shadow: 0 7px 0 #17384f; transition: transform .12s, box-shadow .12s; }
+    .action:hover { transform: translateY(-2px); }
+    .action:active { transform: translateY(5px); box-shadow: 0 2px 0 #17384f; }
+    .action.alt { background: var(--green); box-shadow: 0 7px 0 #285648; }
+    .action.warn { background: var(--red); box-shadow: 0 7px 0 #8d3432; }
+    .fragment { opacity: .08; transform: translateY(16px); filter: blur(3px); transition: opacity .45s var(--ease-out), transform .45s var(--ease-out), filter .45s var(--ease-out); }
+    .fragment.shown { opacity: 1; transform: none; filter: none; }
+    .answer { min-height: 120px; margin-top: 20px; }
+    .feedback { font: 700 27px/1.45 var(--font-body); padding: 20px 24px; border-radius: 18px; background: var(--green-soft); border: 2px solid #b8d9cd; }
+
+    /* === TITLE SLIDE === */
+    .title-slide .paper { background: repeating-linear-gradient(0deg, transparent 0 56px, rgba(33,78,115,.055) 57px 58px), var(--paper); }
+    .title-meta { position: absolute; left: 160px; top: 94px; display: flex; align-items: center; gap: 24px; font: 700 19px var(--font-body); color: var(--muted); letter-spacing: .11em; text-transform: uppercase; }
+    .title-meta .pill { background: var(--mint); color: #23342e; padding: 10px 20px; border-radius: 999px; }
+    .title-block { position: absolute; left: 160px; top: 220px; width: 1020px; }
+    .title-block h1 { font: 900 112px/.98 var(--font-cjk-display); letter-spacing: -.055em; }
+    .title-block .english { display: block; margin-top: 14px; font: 700 50px/1.05 var(--font-display); color: var(--green); letter-spacing: -.035em; }
+    .title-block .sub { margin-top: 28px; font: 600 34px var(--font-body); color: #4c504b; }
+    .title-plot { position: absolute; right: 150px; top: 218px; width: 500px; height: 475px; }
+    .title-paper-info { position: absolute; left: 160px; bottom: 104px; font: 500 22px/1.65 var(--font-body); color: var(--muted); }
+    .title-paper-info strong { color: var(--ink); }
+    .title-tabs { position: absolute; right: 38px; top: 132px; display: grid; gap: 12px; z-index: 12; }
+    .title-tabs span { width: 54px; height: 120px; border-radius: 0 18px 18px 0; writing-mode: vertical-rl; display: grid; place-items: center; font: 700 17px var(--font-body); color: #263332; }
+
+    /* === SECTION BREAKS === */
+    .section-break .content { display: grid; grid-template-columns: 410px 1fr; align-items: center; gap: 54px; }
+    .section-index { font: 700 220px/1 var(--font-display); color: var(--tab-color); text-shadow: 4px 4px 0 #fff; }
+    .section-break h2 { font: 900 84px/1.15 var(--font-cjk-display); letter-spacing: -.04em; }
+    .section-break p { font: 500 31px/1.55 var(--font-body); margin-top: 22px; color: #50544f; max-width: 850px; }
+
+    /* === ANIMATIONS === */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
+    .slide.visible .reveal { opacity: 1; transform: none; }
+    .slide.visible .reveal:nth-child(2) { transition-delay: .08s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: .16s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: .24s; }
+    .pulse { animation: pulse 1.8s infinite; }
+    @keyframes pulse { 50% { transform: scale(1.06); } }
+
+    /* === OUTSIDE-STAGE NAVIGATION === */
+    .deck-controls { display: flex; align-items: center; gap: 12px; padding: 9px 13px; border-radius: 999px; background: rgba(24,24,24,.8); backdrop-filter: blur(10px); opacity: .18; transition: opacity .25s; }
+    .deck-controls:hover { opacity: 1; }
+    .deck-controls button { width: 34px; height: 34px; border-radius: 50%; border: 0; color: white; background: #4d4d4d; cursor: pointer; }
+    .progress-track { width: 180px; height: 5px; border-radius: 5px; background: #646464; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--mint); width: 0; transition: width .25s; }
+    .page-counter { color: white; font: 600 13px var(--font-body); min-width: 58px; text-align: center; }
+    .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+    .edit-toggle { position: fixed; top: 14px; left: 14px; z-index: 10001; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--red); color: white; opacity: 0; pointer-events: none; transition: opacity .3s; cursor: pointer; }
+    .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+    body.editing [data-editable] { outline: 2px dashed var(--red); outline-offset: 4px; cursor: text; }
+    .overview { position: fixed; inset: 0; z-index: 9000; display: none; padding: 40px; overflow: auto; background: rgba(24,24,24,.96); color: white; font-family: var(--font-body); }
+    .overview.open { display: block; }
+    .overview h2 { font-size: 34px; margin-bottom: 22px; }
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; }
+    .overview button { min-height: 92px; padding: 14px; border: 1px solid #666; border-radius: 14px; background: #343434; color: white; text-align: left; cursor: pointer; }
+    .overview button.current { border-color: var(--mint); background: #29473e; }
+
+    /* === DEEP REVISION === */
+    .slide:not(.section-break) .content:not(.center) { display:flex; flex-direction:column; }
+    .lesson-grid { min-height:0; align-items:start; align-content:center; margin-top:24px; }
+    .lesson-grid.compact, .lesson-grid.medium-grid, .lesson-grid.compact-grid { min-height:0; }
+    .content:not(.center) > .lesson-grid { flex:1 1 auto; }
+    .lesson-grid > .card { height:auto; align-self:start; }
+    .definition-band { display:flex; align-items:center; gap:26px; min-height:105px; margin:12px 0 24px; padding:20px 28px; border-left:9px solid var(--blue); background:var(--blue-soft); border-radius:0 18px 18px 0; font:500 27px/1.45 var(--font-body); }
+    .definition-band b { flex:0 0 auto; padding:9px 16px; border-radius:12px; background:var(--blue); color:white; font-size:22px; }
+    .definition-band.warning { border-color:var(--red); background:var(--red-soft); }
+    .definition-band.warning b { background:var(--red); }
+    .formula-block { padding:28px 34px; background:#fffdf9; border:3px solid #d8d2c6; border-radius:22px; text-align:center; font:700 36px/1.55 var(--font-body); }
+    .process { display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin:26px 0; }
+    .process > div { min-height:150px; padding:22px; display:grid; align-content:center; gap:10px; text-align:center; border:2px solid #d8d2c6; border-radius:20px; background:#fffdf9; }
+    .process b { font:800 28px var(--font-body); color:var(--blue); }
+    .process span { font:500 22px/1.4 var(--font-body); }
+    .scale-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:26px 0; }
+    .scale-row span { min-height:145px; display:grid; place-items:center; align-content:center; gap:10px; border:3px solid #d3cbbd; border-radius:20px; background:linear-gradient(135deg,#fffdf9,var(--green-soft)); font:800 44px var(--font-display); text-align:center; }
+    .scale-row small { font:600 20px var(--font-body); }
+  </style>
+</head>
+
+<body>
+  <div class="deck-viewport" aria-label="Caferra et al. (2026) 论文精读课件">
+    <main class="deck-stage" id="deckStage">
+
+      <!-- ============ COVER ============ -->
+      <section class="slide title-slide active" data-title="封面">
+        <div class="paper">
+          <div class="title-meta"><span class="pill">Tutorial 02</span><span>Behavioural Economics</span></div>
+          <div class="title-block">
+            <h1 class="reveal" data-editable>精读《Shades of Green Behaviour》<span class="english">Reading a Behavioural Economics Paper</span></h1>
+            <p class="sub reveal">心理距离、社会因素与三类绿色行为</p>
+          </div>
+          <div class="title-plot">
+            <svg viewBox="0 0 500 475" aria-label="三类绿色行为示意图">
+              <text x="250" y="50" text-anchor="middle" font-family="DM Sans" font-size="22" font-weight="700" fill="#397a68">三类绿色行为</text>
+              <circle cx="120" cy="240" r="80" fill="#98d4bb" opacity="0.88"/>
+              <text x="120" y="235" text-anchor="middle" font-family="DM Sans" font-size="18" font-weight="800" fill="#23342e">Attitudes</text>
+              <text x="120" y="260" text-anchor="middle" font-family="DM Sans" font-size="14" fill="#23342e">总体态度</text>
+              <circle cx="250" cy="240" r="80" fill="#397a68" opacity="0.78"/>
+              <text x="250" y="235" text-anchor="middle" font-family="DM Sans" font-size="18" font-weight="800" fill="white">Habitual</text>
+              <text x="250" y="260" text-anchor="middle" font-family="DM Sans" font-size="14" fill="white">日常习惯</text>
+              <circle cx="380" cy="240" r="80" fill="#214e73" opacity="0.82"/>
+              <text x="380" y="235" text-anchor="middle" font-family="DM Sans" font-size="18" font-weight="800" fill="white">Occasional</text>
+              <text x="380" y="260" text-anchor="middle" font-family="DM Sans" font-size="14" fill="white">偶发投资</text>
+              <text x="250" y="420" text-anchor="middle" font-family="DM Sans" font-size="18" fill="#666a65">心理距离 · 灾害经历 · 信任与社会资本</text>
+            </svg>
+          </div>
+          <div class="title-paper-info">
+            <strong>Caferra, Morone &amp; Morone (2026)</strong><br>
+            <em>Ecological Economics</em> 244: 108976<br>
+            TA: Ray · Renmin University of China · 2026.07.15
+          </div>
+          <div class="title-tabs">
+            <span style="background:var(--mint)">温故</span>
+            <span style="background:var(--lavender)">概览</span>
+            <span style="background:var(--pink)">理论</span>
+            <span style="background:var(--sky)">方法</span>
+            <span style="background:var(--cream)">结果</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PART 0: 温故知新 ============ -->
+      <section class="slide section-break" data-tab="温故" style="--tab-color:var(--mint)" data-title="Part 0 温故知新">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">00</div>
+          <div>
+            <div class="eyebrow reveal">Part 0</div>
+            <h2 class="reveal" data-editable>温故知新</h2>
+            <p class="reveal">先回顾上学期核心概念，再说明本节如何把这些概念运用于一篇真实论文。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="温故" style="--tab-color:var(--mint)" data-title="Agenda">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">温故</div>
+          <h2 class="slide-title reveal" data-editable>本节流程</h2>
+          <div class="steps reveal">
+            <div class="step"><b>1</b><h3>快速复习</h3><p>上学期行为经济学核心概念。</p></div>
+            <div class="step"><b>2</b><h3>论文精读</h3><p>约 100 分钟通读 Caferra et al. (2026)。</p></div>
+            <div class="step"><b>3</b><h3>逐表分析</h3><p>从描述统计到 Tobit 稳健性。</p></div>
+            <div class="step"><b>4</b><h3>讨论结论</h3><p>政策含义、局限与延伸。</p></div>
+            <div class="step"><b>5</b><h3>课堂练习</h3><p>三类行为分类与 nudge 设计。</p></div>
+            <div class="step"><b>6</b><h3>课后作业</h3><p>填写 reading_summary 并交回。</p></div>
+          </div>
+          <div class="definition-band reveal"><b>本节目的</b><span>用上学期的概念框架，完整精读一篇学术论文。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="温故" style="--tab-color:var(--mint)" data-title="课程大纲">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">温故</div>
+          <h2 class="slide-title reveal" data-editable>课程大纲定位</h2>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card green"><h3>已完成</h3><p>L1 课题设定 + 行为经济学入门</p></div>
+            <div class="card blue"><h3>本节</h3><p><strong>L2 理论精读</strong>（本文）</p></div>
+            <div class="card gold"><h3>后续</h3><p>L3 在线实验设计 · L4 文献综述 · L5–6 实验搭建 · L7 数据清洗 · L8 初步分析 · L9 可视化 · L10 答辩</p></div>
+          </div>
+          <div class="definition-band reveal"><b>定位</b><span>本节是 L1（概念）与 L3（实验设计）之间的桥梁：用一篇真实论文把概念落到证据上。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="温故" style="--tab-color:var(--mint)" data-title="上学期概念回顾 I">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">温故</div>
+          <h2 class="slide-title reveal" data-editable>上学期概念回顾 I</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>1. 标准 vs 行为经济学</h3><p class="muted">Homo Economicus 完全理性；行为经济学以有限理性和系统性偏差修正之。</p></div>
+            <div class="card green"><h3>2. 损失厌恶 Loss Aversion</h3><p class="muted">Prospect Theory：损失的痛苦 &gt; 同等收益的快乐，即 V(x) &lt; |V(−x)|。</p></div>
+            <div class="card gold"><h3>3. 当下偏差 Present Bias</h3><p class="muted">时间不一致性：近期权重高于远期。承诺机制用于对抗意志力薄弱。</p></div>
+            <div class="card red"><h3>4. 社会偏好 Social Preferences</h3><p class="muted">个体除自利外亦关注公平与互惠；独裁者博弈中多数人分给陌生人 20%–30%。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="温故" style="--tab-color:var(--mint)" data-title="上学期概念回顾 II">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">温故</div>
+          <h2 class="slide-title reveal" data-editable>上学期概念回顾 II</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>5. 助推 Nudge</h3><p class="muted">改变选择架构引导行为，不改变激励。默认选项是典型实例。</p></div>
+            <div class="card green"><h3>6. 实验工具箱</h3><p class="muted">实验室 / 实地 / 在线三类。本文使用在线问卷调查（Prolific 平台）。</p></div>
+            <div class="card gold"><h3>7. 相关 ≠ 因果</h3><p class="muted">冰淇淋销量 vs 鲨鱼袭击；遗漏变量是气温。Corr = Causal + Selection Bias。</p></div>
+            <div class="card red"><h3>8. RCT 随机对照试验</h3><p class="muted">随机化打破选择偏差，是因果推断的标准方法。</p></div>
+          </div>
+          <div class="callout reveal">本节论文为<strong>观察性研究</strong>，可作为"相关 ≠ 因果"的实例分析。</div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="温故" style="--tab-color:var(--mint)" data-title="论文与上学期概念的对应">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">温故</div>
+          <h2 class="slide-title reveal" data-editable>论文与上学期概念的对应</h2>
+          <table class="data-table reveal">
+            <thead><tr><th>论文中的概念</th><th>上学期对应</th><th>对应行为</th></tr></thead>
+            <tbody>
+              <tr><td>时间距离 Temporal distance</td><td>Present bias</td><td>偶发绿色投资</td></tr>
+              <tr><td>社会距离 Social distance</td><td>Social preferences / in-group bias</td><td>日常习惯 + 经济态度</td></tr>
+              <tr><td>灾害经历 Experience</td><td>Loss aversion 的延伸</td><td>节约/降耗行为</td></tr>
+              <tr><td>"Proximising" 政策</td><td>Nudge</td><td>政策落地</td></tr>
+              <tr><td>横截面观察数据</td><td>相关 ≠ 因果</td><td>方法论局限</td></tr>
+            </tbody>
+          </table>
+          <div class="definition-band reveal"><b>观察</b><span>上学期建立的概念框架，在本节论文中以可测量的变量再次出现。</span></div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 1: 论文概览 ============ -->
+      <section class="slide section-break" data-tab="概览" style="--tab-color:var(--lavender)" data-title="Part 1 论文概览">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">01</div>
+          <div>
+            <div class="eyebrow reveal">Part 1</div>
+            <h2 class="reveal" data-editable>论文概览</h2>
+            <p class="reveal">论文基本信息、核心主张、主要发现与整体结构。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="概览" style="--tab-color:var(--lavender)" data-title="论文基本信息">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">概览</div>
+          <h2 class="slide-title reveal" data-editable>论文基本信息</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>标题</h3><p><em>Shades of Green Behaviour under Heterogeneous Subjective Risk and Social Domains</em></p></div>
+            <div class="card green"><h3>作者</h3><p>Rocco Caferra (Bari) · Andrea Morone (Bari &amp; CIAS) · Piergiuseppe Morone (UnitelmaSapienza &amp; CIAS)</p></div>
+            <div class="card gold"><h3>期刊与 DOI</h3><p><em>Ecological Economics</em> 244 (2026), Article 108976<br>10.1016/j.ecolecon.2026.108976</p></div>
+            <div class="card red"><h3>数据与方法</h3><p>意大利 Prolific 在线调查，2024 年 1 月，N = 203；横截面多元回归 + Tobit 稳健性（非实验）。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="概览" style="--tab-color:var(--lavender)" data-title="题目解读 Shades of Green">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">概览</div>
+          <h2 class="slide-title reveal" data-editable>题目解读：Shades of Green</h2>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card green"><h3>General attitudes</h3><p>总体态度：愿付高价、愿交税、愿捐款。</p></div>
+            <div class="card blue"><h3>Habitual behaviour</h3><p>日常习惯：关灯、节水、避免过度包装。</p></div>
+            <div class="card gold"><h3>Occasional behaviour</h3><p>偶发投资：节能电器、太阳能板、新能源车。</p></div>
+          </div>
+          <div class="definition-band reveal"><b>核心主张</b><span>"Shades"指绿色行为存在异质性，不同类型由不同的心理与社会因素驱动。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="概览" style="--tab-color:var(--lavender)" data-title="核心发现">
+        <div class="paper"><div class="content center">
+          <div>
+            <div class="eyebrow reveal">核心发现</div>
+            <h2 class="big-idea reveal" data-editable>不同类型的绿色行为<br>由不同的心理与社会因素驱动</h2>
+            <p class="lead reveal" style="margin:24px auto 0">环保政策需按行为类型分类设计，而非采用统一干预。</p>
+            <div class="accent-rule reveal" style="margin:32px auto"></div>
+            <div class="grid-4 reveal">
+              <div class="card green"><h3>个人灾害经历</h3><p>→ 与日常节约型行为关联</p></div>
+              <div class="card blue"><h3>社会亲近感</h3><p>→ 与经济支持意愿关联</p></div>
+              <div class="card gold"><h3>时间亲近感</h3><p>→ 与偶发绿色投资关联</p></div>
+              <div class="card red"><h3>调节因素</h3><p>制度信任 + 社会资本</p></div>
+            </div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="概览" style="--tab-color:var(--lavender)" data-title="论文结构 IMRaD">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">概览</div>
+          <h2 class="slide-title reveal" data-editable>论文结构（IMRaD 扩展）</h2>
+          <div class="process reveal" style="grid-template-columns:repeat(5,1fr)">
+            <div><b>1</b><span>Introduction<br>心理距离与三类异质性</span></div>
+            <div><b>2</b><span>Literature Review<br>意图—行动类型 + 社会偏好</span></div>
+            <div><b>3</b><span>Data &amp; Method<br>Prolific 调查 + OLS + Tobit</span></div>
+            <div><b>4</b><span>Results<br>6 表 + 1 系数图</span></div>
+            <div><b>5</b><span>Discussion<br>政策含义 + 6 项局限</span></div>
+          </div>
+          <div class="definition-band reveal"><b>附录</b><span>Tobit 稳健性结果 + 相关热图，用于回应审稿人对模型选择与共线性的担忧。</span></div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 2: 理论与假说 ============ -->
+      <section class="slide section-break" data-tab="理论" style="--tab-color:var(--pink)" data-title="Part 2 理论与假说">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">02</div>
+          <div>
+            <div class="eyebrow reveal">Part 2</div>
+            <h2 class="reveal" data-editable>理论与假说</h2>
+            <p class="reveal"> Construal Level Theory 的四个维度、真实灾害经历与社会维度，共同构成解释框架。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="气候变化与心理距离">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>气候变化与心理距离</h2>
+          <div class="lead reveal" style="margin-bottom:24px">科学证据已较为充分，但公众行动意愿偏低。<br>作者的解释框架：<strong>psychological distance</strong>——公众感知气候变化"很远"。</div>
+          <div class="grid-4 lesson-grid reveal">
+            <div class="card blue"><h3>Hypothetical</h3><p>是否会发生？</p></div>
+            <div class="card green"><h3>Temporal</h3><p>何时发生？</p></div>
+            <div class="card gold"><h3>Spatial</h3><p>在何地发生？</p></div>
+            <div class="card red"><h3>Social</h3><p>影响到谁？</p></div>
+          </div>
+          <div class="definition-band warning reveal"><b>命题</b><span>心理距离越远，风险感知越低，行动意愿越低。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="CLT 四维度">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>Construal Level Theory 的四个维度</h2>
+          <div class="lead reveal" style="margin-bottom:20px">Trope &amp; Liberman (2010)：心理距离的四个相互关联的维度。</div>
+          <table class="data-table reveal">
+            <thead><tr><th>维度</th><th>核心问题</th><th>对应行为偏见</th></tr></thead>
+            <tbody>
+              <tr><td>Hypothetical</td><td>事件是否会发生？</td><td>假设偏差；概率误判</td></tr>
+              <tr><td>Temporal</td><td>事件何时发生？</td><td><strong>当下偏差 present bias</strong></td></tr>
+              <tr><td>Spatial</td><td>事件在何地发生？</td><td>空间乐观偏差</td></tr>
+              <tr><td>Social</td><td>事件影响谁？</td><td><strong>群体内偏差 in-group bias；社会偏好</strong></td></tr>
+            </tbody>
+          </table>
+          <div class="definition-band reveal"><b>与上学期呼应</b><span>时间与社交维度直接对应 present bias 与 social preferences。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="四个维度的解读">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>四个维度的解读</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>1. Hypothetical distance</h3><p>受访者对"气候变化是否真的会发生"的判断。越怀疑，距离越远。</p></div>
+            <div class="card green"><h3>2. Temporal distance</h3><p>对"气候变化属于未来"的判断。越推至未来，距离越远。<br><span class="muted">对应上学期 present bias 在环境议题的应用。</span></p></div>
+            <div class="card gold"><h3>3. Spatial distance</h3><p>对"气候变化主要影响地理上遥远地区"的判断。</p></div>
+            <div class="card red"><h3>4. Social distance</h3><p>对"受影响的是他人而非自己或家人"的判断。<br><span class="muted">对应 in-group / out-group 偏见。</span></p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="第三类异质性 真实灾害经历">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>第三类异质性：真实灾害经历</h2>
+          <div class="lead reveal" style="margin-bottom:24px">除主观感知外，作者引入一个客观变量：<br><strong>"受访者本人或家人是否经历过自然灾害？"</strong></div>
+          <div class="scale-row reveal" style="grid-template-columns:repeat(4,1fr)">
+            <span>0<small>无经历</small></span>
+            <span>1<small>basic<br>因灾害被迫搬离</small></span>
+            <span>2<small>negative<br>因灾害遭受财产损失</small></span>
+            <span>3<small>extremely neg.<br>缺水电食物</small></span>
+          </div>
+          <div class="definition-band warning reveal"><b>与上学期呼应</b><span>已发生的损失会改变后续决策，与 loss aversion 一致：亲历损失者表现出更显著的预防性动机。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="社会维度 水平与垂直">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>社会维度：水平与垂直</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>垂直 Vertical 维度</h3><p class="muted">个人 ↔ 制度</p><ul class="clean"><li><strong>Institutional trust</strong>：对地方政府、公共机构的信任</li><li>"好制度造就好人"（North, 1993）</li></ul></div>
+            <div class="card green"><h3>水平 Horizontal 维度</h3><p class="muted">个人 ↔ 同侪</p><ul class="clean"><li><strong>Social trust</strong>：对"大多数人是否可信任"的判断</li><li><strong>Structural social capital</strong>：与亲友同事互动频率</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>与社会偏好对应</b><span>社会资本度量人际连接强度，影响 other-regarding preferences 的形成与表达。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="三种绿色行为">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>三种"绿色"行为（Lavelle et al. 2015）</h2>
+          <table class="data-table reveal">
+            <thead><tr><th>类别</th><th>含义</th><th>经济特征</th></tr></thead>
+            <tbody>
+              <tr><td><strong>General attitudes</strong></td><td>对环保的总体态度与支持意愿</td><td>价值层面的偏好倾向</td></tr>
+              <tr><td><strong>Habitual behaviour</strong></td><td>日常习惯（关灯、节水、自带购物袋）</td><td>高频、低成本、嵌入生活方式</td></tr>
+              <tr><td><strong>Occasional behaviour</strong></td><td>偶发大额投资（装保温、买新能源车）</td><td>低频、高成本、跨期投资品</td></tr>
+            </tbody>
+          </table>
+          <div class="callout reveal" style="margin-top:24px"><strong>关键观察：</strong>habitual 与 occasional 表面均为"环保行为"，但经济机制差异显著——habitual 为日常低成本连续决策，occasional 为跨期投资决策。</div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="理论" style="--tab-color:var(--pink)" data-title="两个核心假说">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">理论</div>
+          <h2 class="slide-title reveal" data-editable>两个核心假说</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><div class="number">Hp1</div><h3>感知风险假说</h3><p>风险感知越高（心理距离越近、亲身经历越深），环保承诺越强。</p></div>
+            <div class="card green"><div class="number">Hp2</div><h3>社会偏好假说</h3><p>社会偏好越强（信任越高、社会资本越厚），环保承诺越强。</p></div>
+          </div>
+          <div class="definition-band reveal"><b>异质性问题</b><span>作者不预先指定哪种距离或社会因素对哪类行为最重要，而是允许数据呈现异质性。</span></div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 3: 数据与方法 ============ -->
+      <section class="slide section-break" data-tab="方法" style="--tab-color:var(--sky)" data-title="Part 3 数据与方法">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">03</div>
+          <div>
+            <div class="eyebrow reveal">Part 3</div>
+            <h2 class="reveal" data-editable>数据与方法</h2>
+            <p class="reveal">Prolific 在线样本、Likert 量表测量、关键变量，以及观察性数据与 RCT 的本质差别。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="数据来源">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>数据来源</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>调查设计</h3><ul class="clean"><li><strong>平台</strong>：Prolific（在线调查众包，类似 MTurk）</li><li><strong>时间</strong>：2024 年 1 月</li><li><strong>样本</strong>：203 名意大利居民</li><li><strong>报酬</strong>：每人 €2</li></ul></div>
+            <div class="card green"><h3>问卷质量</h3><ul class="clean"><li>5 位大学教授 + 10 位环境/行为经济学研究者预审</li><li>性别、年龄、地理上做了平衡</li><li>仍未达到完美代表（在线样本的固有局限）</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>国别选择</b><span>意大利内部区域差异较大（南北在气候、基础设施、社会规范上显著不同），有利于研究异质性。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="Likert 题项的测量方式">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>Likert 题项的测量方式</h2>
+          <div class="lead reveal" style="margin-bottom:18px">示例（A1：愿意为环保支付更高价格）：</div>
+          <div class="scale-row reveal">
+            <span>1<small>非常不同意</small></span>
+            <span>2<small>不同意</small></span>
+            <span>3<small>中立</small></span>
+            <span>4<small>同意</small></span>
+            <span>5<small>非常同意</small></span>
+          </div>
+          <ul class="clean reveal">
+            <li><strong>题项 item</strong>：单个问题；<strong>量表 scale</strong>：多个题项合成一个构念</li>
+            <li>合成方式：对若干题项取<strong>标准化均值</strong>（如 A1–A6 → general attitudes）</li>
+            <li><strong>反向计分</strong>：Social distance 题项同意反而表示距离近</li>
+          </ul>
+          <div class="callout reveal">Likert 为有序离散变量，本文按连续变量做 OLS，这一处理带来后续讨论的局限。</div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="General Attitudes A1-A6">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>被解释变量（1）：General Attitudes（A1–A6）</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>经济态度 A1–A4</h3><ul class="clean"><li><strong>A1</strong>：支付更高价格</li><li><strong>A2</strong>：支持更高税收</li><li><strong>A3</strong>：牺牲某些个人舒适</li><li><strong>A4</strong>：愿从 €10 中捐多少减少 1 吨 CO₂</li></ul></div>
+            <div class="card green"><h3>社会态度 A5–A6</h3><ul class="clean"><li><strong>A5</strong>：愿意改变生活方式</li><li><strong>A6</strong>：自评环境知识水平高于同龄人</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>合成方式</b><span>A1–A6 取标准化均值，合成 general attitudes 指标。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="Habitual 与 Occasional">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>被解释变量（2）：Habitual 与 Occasional</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card green"><h3>Habitual behaviours（日常）</h3><ul class="clean"><li><strong>H1</strong>：购买可重复使用产品</li><li><strong>H2</strong>：减少能耗</li><li><strong>H3</strong>：减少用水</li><li><strong>H4</strong>：避免过度包装</li></ul></div>
+            <div class="card gold"><h3>Occasional behaviours（偶发）</h3><ul class="clean"><li><strong>O1</strong>：购买节能电器</li><li><strong>O2</strong>：安装保温材料</li><li><strong>O3</strong>：切换可再生能源供应商</li><li><strong>O4</strong>：购买燃油效率更高的车</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>信度</b><span>Cronbach's α 三个量表均 ≥ 0.81，合成指标合理。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="关键解释变量">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>关键解释变量</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>心理距离（数值越高 = 距离越远）</h3><ul class="clean"><li><strong>Hypothetical</strong>：气候变化在未来几年才会出现</li><li><strong>Temporal</strong>：只会影响后代，不影响当代</li><li><strong>Spatial</strong>：主要影响远离这里的地方</li><li><strong>Social</strong>：会影响到我、家人和朋友（<em>反向计分</em>）</li></ul></div>
+            <div class="card green"><h3>其他变量</h3><ul class="clean"><li><strong>真实经历</strong>：ordinal 0–3</li><li>Institutional trust</li><li>Social trust</li><li>Structural social capital</li><li><strong>控制变量</strong>：性别、年龄、教育、收入、家庭规模</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>说明</b><span>心理距离四维之间相关性均较低（见 Table 2），可作为独立变量同时纳入回归。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="观察性数据 vs RCT">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>观察性数据 vs RCT</h2>
+          <div class="callout warning reveal" style="background:rgba(244,223,220,.7);border-left-color:var(--red);padding:18px 24px;font:700 26px/1.45 var(--font-body);margin-bottom:18px"><strong>注意：</strong>本文为横截面观察性调查，非实验研究。</div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card green"><h3>RCT</h3><p>研究者<strong>随机</strong>分配 treatment，两组在统计上等同，差异 = 因果效应。</p></div>
+            <div class="card red"><h3>本文</h3><p>研究者只<strong>观察</strong>受访者的心理距离与社会特征，无干预。</p></div>
+          </div>
+          <div class="definition-band warning reveal"><b>可能的替代解释</b><span>反向因果（环保者主动关注气候 → 感知更近）；遗漏变量（开放性同时影响两者）。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="方法" style="--tab-color:var(--sky)" data-title="回归方程与策略">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">方法</div>
+          <h2 class="slide-title reveal" data-editable>回归方程与策略</h2>
+          <div class="formula-block reveal" style="font-size:26px;line-height:1.7;text-align:left;padding:24px 30px">
+            Y<sub>i</sub> = β₀ + β₁·HypoDist + β₂·TempDist + β₃·SpatDist + β₄·SocDist<br>
+            &emsp;&emsp;+ β₅·Experience + β₆·InstTrust + β₇·SocCapital + β₈·SocTrust<br>
+            &emsp;&emsp;+ γ₁·Gender + γ₂·Age + γ₃·Education + γ₄·Income + γ₅·HouseholdSize + ε<sub>i</sub>
+          </div>
+          <div class="grid-2 reveal" style="margin-top:24px">
+            <div class="card blue"><h3>Y 的三种取值</h3><p>分别代入 general attitudes、habitual、occasional 三个指标。</p></div>
+            <div class="card green"><h3>Tobit 稳健性动机</h3><p>因变量为有界 Likert 合成，存在 corner solutions（多数受访者答 5/5）。Tobit 显式建模这种截断。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 4: 结果逐表精读 ============ -->
+      <section class="slide section-break" data-tab="结果" style="--tab-color:var(--cream)" data-title="Part 4 结果逐表精读">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">04</div>
+          <div>
+            <div class="eyebrow reveal">Part 4</div>
+            <h2 class="reveal" data-editable>结果逐表精读</h2>
+            <p class="reveal">从描述统计到主回归、系数图，再到 Tobit 稳健性，逐张图表完成精读。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="回归表常见术语">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>回归表阅读常见术语</h2>
+          <table class="data-table reveal">
+            <thead><tr><th>术语</th><th>含义</th></tr></thead>
+            <tbody>
+              <tr><td><strong>系数 β</strong></td><td>自变量每升 1 单位，Y 平均变化 β 单位。<strong>负号</strong> = 距离越远，环保行为越少（与假说一致）。</td></tr>
+              <tr><td><strong>(括号内)标准误</strong></td><td>系数估计的不确定性。括号内数值远小于系数，表明估计较精确。</td></tr>
+              <tr><td><strong>显著性星号</strong></td><td>* p&lt;0.10；** p&lt;0.05；*** p&lt;0.01。星号越多，结果由偶然因素产生的概率越低。</td></tr>
+              <tr><td><strong>90% 置信区间</strong></td><td>Fig. 1 中以横线表示；<strong>横线跨过 0 即不显著</strong>。</td></tr>
+              <tr><td><strong>Observations = 203</strong></td><td>样本量。</td></tr>
+              <tr><td><strong>R-squared</strong></td><td>模型解释 Y 总变异的比例（0–1）。</td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 1 描述统计">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 1：描述统计</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/table1.png" alt="Table 1 描述统计表"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 1, p.4.</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 1 关键观察">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 1 的关键观察</h2>
+          <ul class="clean reveal">
+            <li><strong>N = 203</strong>，男女比例基本均衡（女性占 48.3%）</li>
+            <li><strong>General attitudes</strong> 均值 0.638；<strong>Habitual</strong> 0.876；<strong>Occasional</strong> 0.840 —— habitual 整体高于 attitudes</li>
+            <li><strong>A5 改变生活方式</strong>：均值 4.224 —— <strong>意愿表达最高</strong></li>
+            <li><strong>A4 捐款</strong>：均值 2.248（对应 €2–3）—— <strong>实际金钱付出最低</strong></li>
+            <li>A1 涨价 2.89 &gt; A2 加税 2.79 —— <strong>对税收更敏感</strong></li>
+            <li><strong>Experience</strong> 均值 0.220 —— 仅 22% 受访者有任一级灾害经历</li>
+            <li>心理距离四维：hypothetical 0.465、spatial 0.421、temporal 0.356、<strong style="color:var(--red)">social 0.524 最高</strong></li>
+          </ul>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 2 相关矩阵">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 2：相关矩阵</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/table2.png" alt="Table 2 相关矩阵"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 2, p.6.</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 2 关键信息">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 2 的关键信息</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>心理距离四维之间相关性低</h3><ul class="clean"><li>Temporal ↔ Spatial：r = 0.414*</li><li>Hypothetical ↔ Social：r = 0.267*</li><li>其他配对几乎无关 —— <strong>四维不可合成单一指标</strong></li></ul></div>
+            <div class="card green"><h3>真实经历的相关性</h3><ul class="clean"><li>Experience ↔ Hypothetical：r = −0.148*</li><li>Experience ↔ Social：r = −0.208*</li><li>Experience ↔ Temporal/Spatial：<strong>不显著</strong></li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>解读</b><span>经历灾害者更倾向于相信气候真实发生并影响亲近人群，但对"何时/何地"无显著改变。心理距离是多维结构，经历只影响其中两维。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 3 原表">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 3：General Environmental Attitudes</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/table3.png" alt="Table 3 General Attitudes 回归结果"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 3, p.8.</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 4 原表">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 4：Habitual Behaviours</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/table4.png" alt="Table 4 Habitual Behaviours 回归结果"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 4, p.9.</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 3 解读">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 3 解读：态度的驱动因素</h2>
+          <div class="lead reveal" style="margin-bottom:18px">Full specification（第 9 列）</div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>心理距离</h3><ul class="clean"><li><strong>Temporal distance</strong>：β = −0.157** —— 时间越远，态度越弱</li><li><strong>Social distance</strong>：β = −0.230*** —— <strong>最强的负向预测器</strong></li><li>Spatial、Hypothetical、Experience 在 full 模型不显著</li></ul></div>
+            <div class="card blue"><h3>社会维度</h3><ul class="clean"><li><strong>Institutional trust</strong>：β = 0.163*** —— 信任越高，态度越强</li><li>Social trust、Social capital 在 full 模型不显著</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>核心信息</b><span>环境态度的主要驱动因素为时间距离、社会距离与制度信任。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 4 解读">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 4 解读：Habitual Behaviours</h2>
+          <div class="lead reveal" style="margin-bottom:18px">Full specification（对应第 9 列）</div>
+          <ul class="clean reveal">
+            <li><strong>Spatial distance</strong>：β = −0.079* —— 空间越近，日常环保越强</li>
+            <li><strong>Experience</strong>：β = 0.071** —— <strong>亲身经历是最显著的正向预测器</strong></li>
+            <li><strong>Social capital</strong>：β = 0.108* —— 社会互动频率越高，习惯越好</li>
+            <li>Temporal、Hypothetical、Social distance 不显著</li>
+          </ul>
+          <div class="definition-band warning reveal"><b>核心信息</b><span>日常习惯的驱动因素与"态度"显著不同——主要由真实经历、空间距离与同侪网络决定。</span></div>
+          <div class="callout reveal" style="margin-top:18px"><strong>机制示例：</strong>居住地曾发生洪水者更可能形成节水节电习惯。</div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 5 原表">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 5：Occasional Behaviours</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/table5.png" alt="Table 5 Occasional Behaviours 回归结果"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 5, p.9.</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 5 解读">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 5 解读：Occasional Behaviours</h2>
+          <ul class="clean reveal">
+            <li><strong>Temporal distance</strong>：β = −0.116** —— <strong>唯一显著的距离变量</strong></li>
+            <li>Spatial、Hypothetical、Social distance 均不显著</li>
+            <li>Experience 亦不显著</li>
+          </ul>
+          <div class="definition-band warning reveal"><b>核心信息</b><span>偶发大额绿色投资的唯一显著驱动力为时间距离。</span></div>
+          <div class="card red reveal" style="margin-top:18px"><h3>与 present bias 的对应</h3><ul class="clean"><li>投资回报是<strong>跨期</strong>的（未来数年节省电费）</li><li>若受访者认为气候影响"远在未来"，未来收益折现值降低</li><li>仅认为"气候影响正在发生"者更愿意进行此类投资</li></ul></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Fig. 1 核心系数图">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Fig. 1：核心系数图</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/fig1.png" alt="Fig. 1 核心系数图 90% 置信区间"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Fig. 1, p.10. 90% 置信区间。</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Fig. 1 阅读方法">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Fig. 1 阅读方法</h2>
+          <div class="lead reveal" style="margin-bottom:18px">每行 = 一个自变量；每列 = 一个被解释变量；圆点 = 系数估计；横线 = 90% 置信区间。</div>
+          <div class="grid-4 lesson-grid reveal">
+            <div class="card red"><h3>圆点在 0 左侧</h3><p>负值：距离越远，行为/态度越少（符合 Hp1）</p></div>
+            <div class="card green"><h3>圆点在 0 右侧</h3><p>正值：该因素越多，行为/态度越多（符合 Hp2）</p></div>
+            <div class="card gold"><h3>横线跨过 0</h3><p>不显著（竖直虚线为参考）</p></div>
+            <div class="card blue"><h3>横线越窄</h3><p>估计越精确</p></div>
+          </div>
+          <div class="definition-band reveal"><b>主要观察</b><span>同一自变量在不同行为列上的显著性差异显著——即"shades of green"的视觉证据。无任何单一因素驱动所有行为。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 6 Summary Matrix">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 6：Summary Matrix</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/table6.png" alt="Table 6 Summary Matrix"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 6, p.11. ✓ = p&lt;0.10 显著且方向符合假说。</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Table 6 行/列解读">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Table 6 的行/列解读</h2>
+          <div class="lead reveal" style="margin-bottom:16px">"行为 × 驱动因素"检查矩阵。</div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>纵向观察（列）</h3><ul class="clean"><li><strong>Experience 列</strong>：仅在 curtailment 行为显著</li><li><strong>Temporal 列</strong>：主要在 occasional + investment 类显著</li><li><strong>Social 列</strong>：几乎每行都显著——<strong>最广谱的驱动力</strong>（9/14 行）</li></ul></div>
+            <div class="card green"><h3>横向观察（行）</h3><ul class="clean"><li>"Energy efficient appliances"：Temporal + Spatial + Social capital 共同驱动</li><li>"Renewable energy suppliers"：<strong>无任何因素显著</strong>——研究缺口</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>定位</b><span>此即作者所述 "nuanced and diversified" 政策的实证基础。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Tobit 稳健性">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>稳健性：Table A1 + Fig. A1（Tobit）</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="image-frame"><img src="figures/tableA1.png" alt="Table A1 Tobit summary" style="max-height:560px"><p style="margin-top:10px;text-align:center;font-weight:700">Table A1（Tobit summary）</p></div>
+            <div class="image-frame"><img src="figures/figA1.png" alt="Fig. A1 Tobit coefficient plots" style="max-height:560px"><p style="margin-top:10px;text-align:center;font-weight:700">Fig. A1（Tobit coef. plots）</p></div>
+          </div>
+        </div><div class="source">来源：Caferra et al. (2026), Appendix A, p.13–14.</div></div>
+      </section>
+
+      <section class="slide" data-tab="结果" style="--tab-color:var(--cream)" data-title="Tobit 稳健性的意义">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">结果</div>
+          <h2 class="slide-title reveal" data-editable>Tobit 稳健性的意义</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>问题与 OLS 局限</h3><p>因变量为 1–5 Likert 合成，存在 <strong>corner solutions</strong>（多数受访者对所有题项答 5）。OLS 假设因变量连续无界，可能高估或低估真实效应。</p></div>
+            <div class="card green"><h3>Tobit 与对比结论</h3><p>Tobit 显式建模有界 censoring。<strong>Table 6（OLS）与 Table A1（Tobit）对比</strong>：几乎所有 ✓ 位置一致；"Habitual" 行 Social capital 仍显著。</p></div>
+          </div>
+          <div class="definition-band reveal"><b>结论</b><span>Tobit 验证了 OLS 的核心发现，论文结论稳健。</span></div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 5: 多元证据 ============ -->
+      <section class="slide section-break" data-tab="多元证据" style="--tab-color:var(--lavender)" data-title="Part 5 多元证据">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">05</div>
+          <div>
+            <div class="eyebrow reveal">Part 5</div>
+            <h2 class="reveal" data-editable>多元证据</h2>
+            <p class="reveal">相关热图、因果性边界，以及本文采用的五种互相印证的方法组合。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元证据" style="--tab-color:var(--lavender)" data-title="Fig. A2 相关热图">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元证据</div>
+          <h2 class="slide-title reveal" data-editable>Fig. A2：Correlation Heatmap</h2>
+          <div class="image-frame reveal" style="margin-top:8px"><img src="figures/figA2.png" alt="Fig. A2 相关热图"></div>
+        </div><div class="source">来源：Caferra et al. (2026), Fig. A2, p.15.</div></div>
+      </section>
+
+      <section class="slide" data-tab="多元证据" style="--tab-color:var(--lavender)" data-title="相关热图的启示">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元证据</div>
+          <h2 class="slide-title reveal" data-editable>相关热图的启示</h2>
+          <ul class="clean reveal">
+            <li><strong>心理距离四维之间</strong>：基本为浅色（低相关）—— 验证其作为独立维度的合理性</li>
+            <li><strong>Experience 与各距离维度</strong>：仅与 hypothetical/social 呈弱负相关（蓝色），与 spatial/temporal 几乎无相关</li>
+            <li><strong>三个 behaviour 指标之间</strong>：中度正相关 —— 同一受访者倾向多种环保行为，但相关程度不足以合并</li>
+          </ul>
+          <div class="definition-band reveal"><b>方法学含义</b><span>心理距离、经历、社会资本是相对独立的<strong>分析维度</strong>，可同时纳入回归而不构成多重共线性（VIF &lt; 2）。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元证据" style="--tab-color:var(--lavender)" data-title="相关 ≠ 因果">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元证据</div>
+          <h2 class="slide-title reveal" data-editable>相关 ≠ 因果：本文的二次提醒</h2>
+          <div class="callout warning reveal" style="background:rgba(244,223,220,.7);border-left-color:var(--red);padding:18px 24px;font:700 26px/1.45 var(--font-body);margin-bottom:18px">Fig. A2 提供的是<strong>相关</strong>证据，不足以支持因果推断。</div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card red"><h3>需 RCT 才能回答</h3><p>"让受访者感知气候更近，其环保行为是否会增加？"</p></div>
+            <div class="card gold"><h3>反向因果</h3><p>经历灾害者更环保，是经历改变行为，还是关注环境者对灾害更敏感？</p></div>
+            <div class="card blue"><h3>选择性</h3><p>社会资本高者更环保，是网络塑造价值观，还是环保者主动加入社群？</p></div>
+          </div>
+          <div class="definition-band warning reveal"><b>对应 Limitations 第一条</b><span>"The cross-sectional and correlational design precludes causal inference." 作者明确承认横截面设计的因果推断局限。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元证据" style="--tab-color:var(--lavender)" data-title="本文的方法论组合">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元证据</div>
+          <h2 class="slide-title reveal" data-editable>本文的方法论组合</h2>
+          <div class="lead reveal" style="margin-bottom:18px">16 页论文使用五种互相印证的方法：</div>
+          <div class="process reveal" style="grid-template-columns:repeat(5,1fr)">
+            <div><b>1</b><span><strong>描述统计</strong><br>Table 1：样本特征</span></div>
+            <div><b>2</b><span><strong>相关矩阵</strong><br>Table 2：合理性检验</span></div>
+            <div><b>3</b><span><strong>多元 OLS</strong><br>Tables 3–5：净效应</span></div>
+            <div><b>4</b><span><strong>系数可视化</strong><br>Fig. 1：紧凑呈现</span></div>
+            <div><b>5</b><span><strong>Tobit 稳健性</strong><br>Table A1 + Fig. A1</span></div>
+          </div>
+          <div class="definition-band reveal"><b>写作启示</b><span>高质量实证论文采用多种简单方法互相印证，以提升结论可信度。</span></div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 6: 讨论与结论 ============ -->
+      <section class="slide section-break" data-tab="讨论" style="--tab-color:var(--pink)" data-title="Part 6 讨论与结论">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">06</div>
+          <div>
+            <div class="eyebrow reveal">Part 6</div>
+            <h2 class="reveal" data-editable>讨论与结论</h2>
+            <p class="reveal">六个细化结论、政策含义、与上学期概念的整合、研究局限及与相关文献的对比。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="讨论" style="--tab-color:var(--pink)" data-title="六个细化结论">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">讨论</div>
+          <h2 class="slide-title reveal" data-editable>六个细化结论（R1–R2）</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>R1. 风险感知与经历</h3><ul class="clean"><li><strong>R1a</strong>：社会亲近感 ↑ ⇒ habitual 行为 ↑</li><li><strong>R1b</strong>：时间亲近感 ↑ ⇒ occasional 投资 ↑ —— 与 present bias 一致</li><li><strong>R1c</strong>：灾害经历（含水电短缺）↑ ⇒ curtailment ↑</li></ul></div>
+            <div class="card green"><h3>R2. 社会偏好、信任与社会资本</h3><ul class="clean"><li><strong>R2a</strong>：制度信任 ↑ ⇒ 经济态度（涨价/加税/捐款）↑</li><li><strong>R2b</strong>：社会资本 ↑ ⇒ 总体态度 ↑ —— 同侪效应</li><li><strong>R2c</strong>：社会态度对 habitual/occasional 解释力较弱</li></ul></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="讨论" style="--tab-color:var(--pink)" data-title="政策含义 Risk Localisation">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">讨论</div>
+          <h2 class="slide-title reveal" data-editable>政策含义：Risk Localisation</h2>
+          <div class="definition-band warning reveal" style="margin-bottom:24px"><b>核心建议</b><span>"Proximising Climate Change"——使气候变化在心理感知上变近。</span></div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card green"><h3>日常习惯</h3><p>利用 <strong>社会认同</strong>：以"同群体在节水/节能"为信息框架——借助 in-group 偏见。</p></div>
+            <div class="card gold"><h3>大额投资</h3><p>强调<strong>短期收益</strong>与<strong>近未来影响</strong>：对抗 present bias，把"省电费"放显眼处，把"气候影响"由远未来拉至近未来。</p></div>
+            <div class="card blue"><h3>经济承诺</h3><p>建立<strong>制度信任</strong>：政府透明使用碳税收入，提升公众对加税的支持。</p></div>
+          </div>
+          <div class="definition-band reveal"><b>总体思路</b><span>环保政策应按行为类型分类（triage）设计 nudge，而非采用统一干预。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="讨论" style="--tab-color:var(--pink)" data-title="与上学期概念的整合">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">讨论</div>
+          <h2 class="slide-title reveal" data-editable>与上学期概念的整合</h2>
+          <table class="data-table reveal">
+            <thead><tr><th>上学期概念</th><th>本文中的对应</th><th>驱动行为</th></tr></thead>
+            <tbody>
+              <tr><td>Present bias</td><td>Temporal distance</td><td>Occasional 投资</td></tr>
+              <tr><td>Social preferences / in-group bias</td><td>Social distance</td><td>Habitual + 经济态度</td></tr>
+              <tr><td>Loss aversion</td><td>Direct disaster experience</td><td>Curtailment（节约）</td></tr>
+              <tr><td>Nudge</td><td>"Proximising" 策略</td><td>政策落地</td></tr>
+              <tr><td>Correlation ≠ Causation</td><td>横截面观察数据</td><td>方法论局限</td></tr>
+            </tbody>
+          </table>
+          <div class="definition-band reveal"><b>整合结论</b><span>上学期概念均可在本文中找到对应的可测量变量或研究设计选择。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="讨论" style="--tab-color:var(--pink)" data-title="六项局限性">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">讨论</div>
+          <h2 class="slide-title reveal" data-editable>六项局限性</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>设计层面</h3><ul class="clean"><li><strong>1. 横截面 + 相关性</strong>：无法做因果推断，方向不明</li><li><strong>2. 意图 vs 行为</strong>：问卷测量意图，非实际行为</li><li><strong>3. 情境/结构因素缺失</strong>：未控制能源价格、住房特征、本地政策</li></ul></div>
+            <div class="card gold"><h3>变量层面</h3><ul class="clean"><li><strong>4. 结构/物质因素粒度不足</strong>：收入与住房对节能投资的制约未充分建模</li><li><strong>5. 其他心理变量缺失</strong>：self-efficacy、habits、moral norms 等未纳入</li><li><strong>6. 时间颗粒度不足</strong>：未区分"近未来"与"远未来"</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>研究规范</b><span>论文需同时呈现发现与承认局限，二者共同构成学术贡献。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="讨论" style="--tab-color:var(--pink)" data-title="与 Keane et al. 2025 对比">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">讨论</div>
+          <h2 class="slide-title reveal" data-editable>与 Keane et al. (2025) 的对比</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card green"><h3>共同点</h3><ul class="clean"><li>均强调心理距离对气候感知的重要性</li><li>均发现 hypothetical 距离是有效预测器</li></ul></div>
+            <div class="card blue"><h3>本文的差异化贡献</h3><ul class="clean"><li>Keane 仅关注<strong>感知</strong>层面，本文延伸至<strong>多种行为意图</strong></li><li>Keane 仅考察假设距离一维，本文<strong>同时纳入 4 个距离维度 + 3 个社会维度</strong></li><li>本文将"异质性"作为<strong>核心研究问题</strong>，而非控制变量</li></ul></div>
+          </div>
+          <div class="definition-band reveal"><b>文献定位</b><span>本文在已有文献基础上补充更细的分析维度，属于延伸性贡献。</span></div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 7: 反思与下一站 ============ -->
+      <section class="slide section-break" data-tab="反思" style="--tab-color:var(--mint)" data-title="Part 7 反思与下一站">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">07</div>
+          <div>
+            <div class="eyebrow reveal">Part 7</div>
+            <h2 class="reveal" data-editable>反思与下一站</h2>
+            <p class="reveal">课堂讨论题、从相关到因果的研究升级路径，以及期末项目的种子方向。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="反思" style="--tab-color:var(--mint)" data-title="课堂讨论题">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">反思</div>
+          <h2 class="slide-title reveal" data-editable>课堂讨论题</h2>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card green"><h3>Q1 行为分类练习</h3><p class="muted">回顾过去一周的环保行为，按 attitudes / habitual / occasional 分类。哪类最多？哪类最少？可能的驱动因素是什么？</p></div>
+            <div class="card blue"><h3>Q2 Nudge 设计</h3><p class="muted">选一个具体行为（如"室友关空调"）。基于本节结论，设计一个 nudge：使用哪种心理或社会杠杆？预期效果是什么？</p></div>
+            <div class="card red"><h3>Q3 批判性评估</h3><p class="muted">若作为审稿人，要求作者补做哪项分析或实验？（例如：RCT、加入时间维度、更换样本国别）</p></div>
+          </div>
+          <div class="chips reveal" style="margin-top:24px"><button class="action" id="discussReveal">显示课堂提示</button></div>
+          <div class="answer fragment"><div class="feedback">三个问题没有标准答案。Q1 用于自我观察；Q2 训练政策落地能力；Q3 训练审稿人视角，对期末论文的"limitations"环节有直接帮助。</div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="反思" style="--tab-color:var(--mint)" data-title="从相关到因果">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">反思</div>
+          <h2 class="slide-title reveal" data-editable>从相关到因果</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>本节论文核心证据</h3><ul class="clean"><li>心理距离与环保行为存在<strong>相关关系</strong></li><li>但<strong>无法回答</strong>："使受访者感知气候更近，是否会增加其环保行为？"</li></ul></div>
+            <div class="card green"><h3>回答该问题需实验设计</h3><ul class="clean"><li>随机将受访者分两组</li><li>处理组：阅读"气候影响发生在你所在城市"的文本</li><li>对照组：阅读中性气候科普</li><li>测量后续的环保行为意图或实际选择</li></ul></div>
+          </div>
+          <div class="definition-band warning reveal"><b>下一节课（L3）</b><span>开始学习在线实验设计，把"相关"升级为"因果"。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="反思" style="--tab-color:var(--mint)" data-title="可能的研究延伸">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">反思</div>
+          <h2 class="slide-title reveal" data-editable>可能的研究延伸</h2>
+          <div class="process reveal" style="grid-template-columns:repeat(5,1fr)">
+            <div><b>1</b><span><strong>中国情境复现</strong><br>意大利样本结构在中国是否成立？中国受访者对空间距离是否更敏感？</span></div>
+            <div><b>2</b><span><strong>因果化升级</strong><br>把"心理距离"操作为可干预的 treatment，做在线实验</span></div>
+            <div><b>3</b><span><strong>行为测量</strong><br>除意图外，用真实金钱分配任务（dictator game 环保版）</span></div>
+            <div><b>4</b><span><strong>解释缺口</strong><br>"Renewable energy suppliers"无任何因素显著，值得深挖</span></div>
+            <div><b>5</b><span><strong>跨期动态</strong><br>追踪面板 panel，考察灾害后行为的时间变化</span></div>
+          </div>
+          <div class="definition-band reveal"><b>期末项目</b><span>上述任一方向可作为期末项目的种子。课后请在 reading summary 中记录最感兴趣的方向。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="完成" style="--tab-color:var(--mint)" data-title="本节小结">
+        <div class="paper"><div class="content center">
+          <div>
+            <div class="eyebrow reveal">课程结束</div>
+            <h2 class="big-idea reveal" data-editable>完成对 Caferra et al. (2026)<br>的完整精读</h2>
+            <p class="lead reveal" style="margin:24px auto 0">重点：心理距离四维 · 三种绿色行为的差异 · 相关 ≠ 因果。</p>
+            <div class="accent-rule reveal" style="margin:32px auto"></div>
+            <div class="chips reveal" style="justify-content:center">
+              <span class="chip">L2 理论精读（完成）</span>
+              <span class="chip key">L3 在线实验设计</span>
+              <span class="chip">把"相关"升级为"因果"</span>
+            </div>
+          </div>
+        </div><div class="source">Caferra, Morone &amp; Morone (2026), <em>Ecological Economics</em> 244: 108976.</div></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- === EXTERNAL CONTROLS AND OVERVIEW === -->
+  <div class="deck-controls" aria-label="课件导航">
+    <button id="prevBtn" aria-label="上一页">←</button>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="page-counter" id="pageCounter">1 / 1</span>
+    <button id="nextBtn" aria-label="下一页">→</button>
+  </div>
+  <div class="edit-hotzone" aria-label="显示编辑按钮"></div>
+  <button class="edit-toggle" id="editToggle" title="编辑模式（E）">✎</button>
+  <aside class="overview" id="overview"><h2>课件概览 · 按 O 返回</h2><div class="overview-grid" id="overviewGrid"></div></aside>
+
+  <script>
+    class SlidePresentation {
+      constructor() {
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.stage = document.getElementById('deckStage');
+        this.currentSlide = 0;
+        this.touchStartX = 0;
+        this.wheelLocked = false;
+        this.injectFooters();
+        this.buildOverview();
+        this.setupStageScale();
+        this.setupNavigation();
+        this.showSlide(this.indexFromHash());
+      }
+
+      injectFooters() {
+        this.slides.forEach((slide, index) => {
+          if (slide.classList.contains('title-slide')) return;
+          const paper = slide.querySelector('.paper');
+          if (!paper) return;
+          const footer = document.createElement('div');
+          footer.className = 'auto-footer';
+          footer.textContent = `${index + 1} / ${this.slides.length}`;
+          paper.appendChild(footer);
+        });
+      }
+
+      setupStageScale() {
+        const scale = () => {
+          const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+          const x = (window.innerWidth - 1920 * factor) / 2;
+          const y = (window.innerHeight - 1080 * factor) / 2;
+          this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+      }
+
+      indexFromHash() {
+        const n = Number(location.hash.replace('#',''));
+        return Number.isFinite(n) && n >= 1 ? n - 1 : 0;
+      }
+
+      hiddenFragments() {
+        return [...this.slides[this.currentSlide].querySelectorAll('.fragment:not(.shown)')];
+      }
+
+      next() {
+        const hidden = this.hiddenFragments();
+        if (hidden.length) { hidden[0].classList.add('shown'); return; }
+        this.showSlide(this.currentSlide + 1);
+      }
+
+      previous() {
+        const shown = [...this.slides[this.currentSlide].querySelectorAll('.fragment.shown')];
+        if (shown.length) { shown[shown.length - 1].classList.remove('shown'); return; }
+        this.showSlide(this.currentSlide - 1);
+      }
+
+      showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === this.currentSlide);
+          slide.classList.toggle('visible', i === this.currentSlide);
+          if (i !== this.currentSlide) slide.querySelectorAll('.fragment.shown').forEach(el => el.classList.remove('shown'));
+        });
+        history.replaceState(null, '', `#${this.currentSlide + 1}`);
+        document.getElementById('pageCounter').textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+        document.getElementById('progressFill').style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+        [...document.querySelectorAll('#overviewGrid button')].forEach((btn, i) => btn.classList.toggle('current', i === this.currentSlide));
+      }
+
+      buildOverview() {
+        const grid = document.getElementById('overviewGrid');
+        this.slides.forEach((slide, i) => {
+          const btn = document.createElement('button');
+          btn.innerHTML = `<strong>${String(i + 1).padStart(2,'0')}</strong><br>${slide.dataset.title || 'Untitled'}`;
+          btn.addEventListener('click', () => { this.showSlide(i); this.toggleOverview(false); });
+          grid.appendChild(btn);
+        });
+      }
+
+      toggleOverview(force) {
+        const panel = document.getElementById('overview');
+        panel.classList.toggle('open', typeof force === 'boolean' ? force : !panel.classList.contains('open'));
+      }
+
+      setupNavigation() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.previous());
+        document.addEventListener('keydown', event => {
+          if (event.target.getAttribute?.('contenteditable') === 'true') return;
+          if (['ArrowRight','ArrowDown',' ','PageDown'].includes(event.key)) { event.preventDefault(); this.next(); }
+          if (['ArrowLeft','ArrowUp','PageUp'].includes(event.key)) { event.preventDefault(); this.previous(); }
+          if (event.key === 'Home') this.showSlide(0);
+          if (event.key === 'End') this.showSlide(this.slides.length - 1);
+          if (event.key.toLowerCase() === 'o') this.toggleOverview();
+          if (event.key === 'Escape') this.toggleOverview(false);
+        });
+        this.stage.addEventListener('click', event => {
+          if (event.target.closest('button,[contenteditable="true"]')) return;
+          this.next();
+        });
+        this.stage.addEventListener('touchstart', event => { this.touchStartX = event.changedTouches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', event => {
+          const delta = event.changedTouches[0].clientX - this.touchStartX;
+          if (Math.abs(delta) > 50) delta < 0 ? this.next() : this.previous();
+        }, { passive: true });
+        window.addEventListener('wheel', event => {
+          if (this.wheelLocked || Math.abs(event.deltaY) < 18) return;
+          this.wheelLocked = true;
+          event.deltaY > 0 ? this.next() : this.previous();
+          setTimeout(() => this.wheelLocked = false, 550);
+        }, { passive: true });
+      }
+    }
+
+    class InlineEditor {
+      constructor() {
+        this.isActive = false;
+        this.nodes = [...document.querySelectorAll('[data-editable]')];
+        this.restore();
+        this.setupToggle();
+      }
+      setupToggle() {
+        const hotzone = document.querySelector('.edit-hotzone');
+        const toggle = document.getElementById('editToggle');
+        let hideTimeout = null;
+        const show = () => { clearTimeout(hideTimeout); toggle.classList.add('show'); };
+        const hide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) toggle.classList.remove('show'); }, 400); };
+        hotzone.addEventListener('mouseenter', show); hotzone.addEventListener('mouseleave', hide);
+        toggle.addEventListener('mouseenter', show); toggle.addEventListener('mouseleave', hide);
+        toggle.addEventListener('click', () => this.toggleEditMode());
+        hotzone.addEventListener('click', () => this.toggleEditMode());
+        document.addEventListener('keydown', event => {
+          if ((event.key === 'e' || event.key === 'E') && event.target.getAttribute?.('contenteditable') !== 'true') this.toggleEditMode();
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') { event.preventDefault(); this.download(); }
+        });
+      }
+      toggleEditMode() {
+        this.isActive = !this.isActive;
+        document.body.classList.toggle('editing', this.isActive);
+        document.getElementById('editToggle').classList.toggle('active', this.isActive);
+        this.nodes.forEach((node, index) => {
+          node.contentEditable = this.isActive ? 'true' : 'false';
+          node.oninput = () => localStorage.setItem(`ben-paper-reading-edit-${index}`, node.innerHTML);
+        });
+      }
+      restore() {
+        this.nodes.forEach((node, index) => {
+          const saved = localStorage.getItem(`ben-paper-reading-edit-${index}`);
+          if (saved) node.innerHTML = saved;
+        });
+      }
+      download() {
+        const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = 'tutorial-02-paper-reading-edited.html'; link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      }
+    }
+
+    /* === DISCUSSION REVEAL === */
+    const discussBtn = document.getElementById('discussReveal');
+    if (discussBtn) {
+      discussBtn.addEventListener('click', event => {
+        event.stopPropagation();
+        event.target.closest('.slide').querySelector('.answer').classList.add('shown');
+      });
+    }
+
+    window.presentation = new SlidePresentation();
+    window.editor = new InlineEditor();
+  </script>
+</body>
+</html>

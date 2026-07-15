@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+	locale="en"
+	title="Page not found"
+	description="The requested page could not be found."
+	alternatePath="/zh/"
+	noindex={true}
+>
+	<header class="page-header container">
+		<p class="eyebrow">404</p>
+		<h1>Page not found.</h1>
+		<p class="page-intro">The page may have moved or the address may be incorrect. 页面可能已移动，或地址有误。</p>
+		<div class="button-row">
+			<a class="button" href="/">Return home</a>
+			<a class="button secondary" href="/zh/">返回中文首页</a>
+		</div>
+	</header>
+</BaseLayout>

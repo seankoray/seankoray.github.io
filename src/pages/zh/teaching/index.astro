@@ -1,0 +1,30 @@
+---
+import CourseCard from '../../../components/CourseCard.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getCourses } from '../../../lib/courses';
+
+const courses = await getCourses();
+---
+
+<BaseLayout
+	locale="zh"
+	title="教学"
+	description="Ray的教学页面，包括行为经济学专题课程。"
+	currentSection="teaching"
+	alternatePath="/teaching/"
+>
+	<header class="page-header container">
+		<p class="eyebrow">教学</p>
+		<h1>课程与资料。</h1>
+		<p class="page-intro">课程页面汇集学习主题、说明与相关资料。</p>
+	</header>
+
+	<section class="section">
+		<div class="section-grid container">
+			<p class="section-label">课程</p>
+			<div class="course-grid">
+				{courses.map((course, index) => <CourseCard course={course} locale="zh" index={index} />)}
+			</div>
+		</div>
+	</section>
+</BaseLayout>

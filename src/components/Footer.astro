@@ -1,0 +1,17 @@
+---
+import type { Locale } from '../lib/i18n';
+
+interface Props {
+	locale: Locale;
+}
+
+const { locale } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+	<div class="footer-inner container">
+		<p>© {year} Ray</p>
+		<p>{locale === 'en' ? 'Economics · Teaching' : '经济学 · 教学'}</p>
+	</div>
+</footer>

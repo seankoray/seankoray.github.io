@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="行为经济学与在线实验入门课件：经济学全景、行为偏差、因果推断与实验论文结构。">
+  <title>Tutorial 01｜行为经济学与在线实验入门</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Noto+Sans+SC:wght@400;500;600;700;900&amp;family=Noto+Serif+SC:wght@600;700;900&amp;display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --stage-bg: #292929;
+      --slide-bg: #292929;
+      --paper: #f8f6f1;
+      --paper-deep: #eeeae0;
+      --ink: #191a18;
+      --muted: #666a65;
+      --blue: #214e73;
+      --blue-soft: #e3edf5;
+      --green: #397a68;
+      --green-soft: #dcece6;
+      --red: #c84b49;
+      --red-soft: #f4dfdc;
+      --gold: #d6a84b;
+      --gold-soft: #f5e9c9;
+      --lavender: #c7b8ea;
+      --pink: #f4b8c5;
+      --sky: #a8d8ea;
+      --mint: #98d4bb;
+      --cream: #ffe6a7;
+      --font-display: "Bodoni Moda", "Noto Serif SC", serif;
+      --font-cjk-display: "Noto Serif SC", serif;
+      --font-body: "DM Sans", "Noto Sans SC", sans-serif;
+      --ease-out: cubic-bezier(.16, 1, .3, 1);
+      --shadow: 0 28px 72px rgba(0,0,0,.28);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button { font: inherit; }
+
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+    .deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+    .deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+    .slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+    .slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+    img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+    .deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+
+    @media print {
+      html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+      .deck-viewport { position: static; overflow: visible; background: #fff; }
+      .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+      .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+      .slide:last-child { break-after: auto; page-break-after: auto; }
+      .deck-controls { display: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
+    }
+
+    .paper {
+      position: absolute;
+      inset: 58px 88px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, transparent 0 104px, rgba(200,75,73,.14) 104px 107px, transparent 107px),
+        repeating-linear-gradient(0deg, transparent 0 56px, rgba(33,78,115,.05) 57px 58px),
+        var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .paper::after {
+      content: "";
+      position: absolute;
+      z-index: 8;
+      left: 22px;
+      top: 36px;
+      bottom: 36px;
+      width: 58px;
+      background: radial-gradient(circle, #292929 0 12px, #e7e3da 13px 20px, transparent 21px);
+      background-size: 58px 178px;
+      background-position: center 0;
+      pointer-events: none;
+    }
+    .slide::after {
+      content: attr(data-tab);
+      position: absolute;
+      right: 38px;
+      top: 170px;
+      z-index: 10;
+      width: 54px;
+      min-height: 174px;
+      padding: 20px 0;
+      border-radius: 0 18px 18px 0;
+      background: var(--tab-color, var(--mint));
+      color: #263332;
+      writing-mode: vertical-rl;
+      display: grid;
+      place-items: center;
+      font: 700 20px var(--font-body);
+      letter-spacing: .08em;
+    }
+    .title-slide::after { display: none; }
+    .content {
+      position: absolute;
+      inset: 54px 82px 76px 140px;
+      z-index: 2;
+      font-family: var(--font-body);
+      color: var(--ink);
+    }
+    .slide-title {
+      font: 900 66px/1.15 var(--font-cjk-display);
+      letter-spacing: -.035em;
+      color: var(--ink);
+      margin-bottom: 26px;
+    }
+    .slide-title .en { font: 600 28px var(--font-body); color: var(--green); letter-spacing: .02em; margin-left: 18px; }
+    .eyebrow { font: 700 18px var(--font-body); letter-spacing: .15em; text-transform: uppercase; color: var(--green); margin-bottom: 16px; }
+    .lead { font: 500 34px/1.55 var(--font-body); color: #323532; max-width: 1430px; }
+    .big-idea { font: 900 76px/1.2 var(--font-cjk-display); letter-spacing: -.04em; }
+    .number { font: 700 92px/1 var(--font-display); color: var(--red); }
+    .muted { color: var(--muted); }
+    .small { font-size: 21px; line-height: 1.5; }
+    .source { position: absolute; left: 140px; bottom: 23px; z-index: 3; font: 500 17px var(--font-body); color: #777b75; }
+    .auto-footer { position: absolute; right: 82px; bottom: 22px; z-index: 4; font: 600 17px var(--font-body); color: #777b75; }
+    .accent-rule { width: 126px; height: 7px; background: var(--red); margin: 28px 0; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+    .stack { display: grid; gap: 18px; }
+    .center { display: grid; place-items: center; text-align: center; }
+    .card { background: rgba(255,255,255,.68); border: 2px solid #ded9cf; border-radius: 20px; padding: 26px 28px; box-shadow: 0 8px 22px rgba(40,38,33,.05); }
+    .card h3 { font: 800 30px/1.25 var(--font-body); margin-bottom: 12px; color: var(--blue); }
+    .card p, .card li { font: 500 25px/1.5 var(--font-body); }
+    .card.green { background: var(--green-soft); border-color: #bad9ce; }
+    .card.blue { background: var(--blue-soft); border-color: #bfd4e5; }
+    .card.red { background: var(--red-soft); border-color: #e6c0bb; }
+    .card.gold { background: var(--gold-soft); border-color: #e8d39d; }
+    .callout { border-left: 9px solid var(--red); padding: 20px 28px; background: rgba(244,223,220,.65); font: 700 30px/1.45 var(--font-body); }
+    .callout.blue { border-left-color: var(--blue); background: rgba(227,237,245,.7); }
+    .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 2px solid #cbc7bd; border-radius: 999px; background: #fffdf9; font: 700 20px var(--font-body); }
+    .chip.key { border-color: var(--green); color: var(--green); }
+    ul.clean { list-style: none; display: grid; gap: 16px; }
+    ul.clean li { position: relative; padding-left: 32px; font: 500 27px/1.45 var(--font-body); }
+    ul.clean li::before { content: "◆"; position: absolute; left: 0; top: 4px; font-size: 16px; color: var(--green); }
+    .formula { display: inline-flex; align-items: center; gap: 18px; padding: 18px 28px; background: #fffdf9; border: 2px solid #d8d2c6; border-radius: 18px; font: 600 38px var(--font-body); letter-spacing: .02em; }
+    .formula .beta { font: 700 54px var(--font-display); color: var(--red); }
+
+    .data-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.7); font: 500 22px/1.35 var(--font-body); }
+    .data-table th { background: var(--blue-soft); font: 800 22px var(--font-body); color: var(--blue); padding: 14px 18px; text-align: left; border-bottom: 2px solid var(--blue); }
+    .data-table td { padding: 12px 18px; border-bottom: 1px solid #ded9d0; vertical-align: top; }
+    .data-table tr:nth-child(even) td { background: rgba(255,255,255,.4); }
+
+    .steps { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; margin-top: 35px; }
+    .step { min-height: 214px; border-radius: 22px; padding: 22px 18px; background: #fffdf9; border: 2px solid #dcd7cd; }
+    .step b { display: block; font: 700 45px var(--font-display); color: var(--red); margin-bottom: 10px; }
+    .step h3 { font: 800 24px var(--font-body); margin-bottom: 8px; color: var(--blue); }
+    .step p { font: 500 20px/1.42 var(--font-body); color: #515550; }
+
+    .fragment { opacity: .08; transform: translateY(16px); filter: blur(3px); transition: opacity .45s var(--ease-out), transform .45s var(--ease-out), filter .45s var(--ease-out); }
+    .fragment.shown { opacity: 1; transform: none; filter: none; }
+    .answer { min-height: 120px; margin-top: 20px; }
+    .feedback { font: 700 27px/1.45 var(--font-body); padding: 20px 24px; border-radius: 18px; background: var(--green-soft); border: 2px solid #b8d9cd; }
+
+    .title-slide .paper { background: repeating-linear-gradient(0deg, transparent 0 56px, rgba(33,78,115,.055) 57px 58px), var(--paper); }
+    .title-meta { position: absolute; left: 160px; top: 94px; display: flex; align-items: center; gap: 24px; font: 700 19px var(--font-body); color: var(--muted); letter-spacing: .11em; text-transform: uppercase; }
+    .title-meta .pill { background: var(--mint); color: #23342e; padding: 10px 20px; border-radius: 999px; }
+    .title-block { position: absolute; left: 160px; top: 220px; width: 1020px; }
+    .title-block h1 { font: 900 112px/.98 var(--font-cjk-display); letter-spacing: -.055em; }
+    .title-block .english { display: block; margin-top: 14px; font: 700 50px/1.05 var(--font-display); color: var(--green); letter-spacing: -.035em; }
+    .title-block .sub { margin-top: 28px; font: 600 34px var(--font-body); color: #4c504b; }
+    .title-plot { position: absolute; right: 150px; top: 218px; width: 500px; height: 475px; }
+    .title-paper-info { position: absolute; left: 160px; bottom: 104px; font: 500 22px/1.65 var(--font-body); color: var(--muted); }
+    .title-paper-info strong { color: var(--ink); }
+    .title-tabs { position: absolute; right: 38px; top: 132px; display: grid; gap: 12px; z-index: 12; }
+    .title-tabs span { width: 54px; height: 120px; border-radius: 0 18px 18px 0; writing-mode: vertical-rl; display: grid; place-items: center; font: 700 17px var(--font-body); color: #263332; }
+
+    .section-break .content { display: grid; grid-template-columns: 410px 1fr; align-items: center; gap: 54px; }
+    .section-index { font: 700 220px/1 var(--font-display); color: var(--tab-color); text-shadow: 4px 4px 0 #fff; }
+    .section-break h2 { font: 900 84px/1.15 var(--font-cjk-display); letter-spacing: -.04em; }
+    .section-break p { font: 500 31px/1.55 var(--font-body); margin-top: 22px; color: #50544f; max-width: 850px; }
+
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
+    .slide.visible .reveal { opacity: 1; transform: none; }
+    .slide.visible .reveal:nth-child(2) { transition-delay: .08s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: .16s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: .24s; }
+
+    .deck-controls { display: flex; align-items: center; gap: 12px; padding: 9px 13px; border-radius: 999px; background: rgba(24,24,24,.8); backdrop-filter: blur(10px); opacity: .18; transition: opacity .25s; }
+    .deck-controls:hover { opacity: 1; }
+    .deck-controls button { width: 34px; height: 34px; border-radius: 50%; border: 0; color: white; background: #4d4d4d; cursor: pointer; }
+    .progress-track { width: 180px; height: 5px; border-radius: 5px; background: #646464; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--mint); width: 0; transition: width .25s; }
+    .page-counter { color: white; font: 600 13px var(--font-body); min-width: 58px; text-align: center; }
+    .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+    .edit-toggle { position: fixed; top: 14px; left: 14px; z-index: 10001; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--red); color: white; opacity: 0; pointer-events: none; transition: opacity .3s; cursor: pointer; }
+    .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+    body.editing [data-editable] { outline: 2px dashed var(--red); outline-offset: 4px; cursor: text; }
+    .overview { position: fixed; inset: 0; z-index: 9000; display: none; padding: 40px; overflow: auto; background: rgba(24,24,24,.96); color: white; font-family: var(--font-body); }
+    .overview.open { display: block; }
+    .overview h2 { font-size: 34px; margin-bottom: 22px; }
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; }
+    .overview button { min-height: 92px; padding: 14px; border: 1px solid #666; border-radius: 14px; background: #343434; color: white; text-align: left; cursor: pointer; }
+    .overview button.current { border-color: var(--mint); background: #29473e; }
+
+    .slide:not(.section-break) .content:not(.center) { display:flex; flex-direction:column; }
+    .lesson-grid { min-height:0; align-items:start; align-content:center; margin-top:24px; }
+    .content:not(.center) > .lesson-grid { flex:1 1 auto; }
+    .lesson-grid > .card { height:auto; align-self:start; }
+    .definition-band { display:flex; align-items:center; gap:26px; min-height:105px; margin:12px 0 24px; padding:20px 28px; border-left:9px solid var(--blue); background:var(--blue-soft); border-radius:0 18px 18px 0; font:500 27px/1.45 var(--font-body); }
+    .definition-band b { flex:0 0 auto; padding:9px 16px; border-radius:12px; background:var(--blue); color:white; font-size:22px; }
+    .definition-band.warning { border-color:var(--red); background:var(--red-soft); }
+    .definition-band.warning b { background:var(--red); }
+    .formula-block { padding:28px 34px; background:#fffdf9; border:3px solid #d8d2c6; border-radius:22px; text-align:center; font:700 36px/1.55 var(--font-body); }
+    .process { display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin:26px 0; }
+    .process > div { min-height:150px; padding:22px; display:grid; align-content:center; gap:10px; text-align:center; border:2px solid #d8d2c6; border-radius:20px; background:#fffdf9; }
+    .process b { font:800 28px var(--font-body); color:var(--blue); }
+    .process span { font:500 22px/1.4 var(--font-body); }
+    .scale-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:26px 0; }
+    .scale-row span { min-height:145px; display:grid; place-items:center; align-content:center; gap:10px; border:3px solid #d3cbbd; border-radius:20px; background:linear-gradient(135deg,#fffdf9,var(--green-soft)); font:800 32px var(--font-display); text-align:center; padding:18px; }
+    .scale-row small { font:600 18px var(--font-body); }
+  </style>
+</head>
+
+<body>
+  <div class="deck-viewport" aria-label="行为经济学与在线实验入门课件">
+    <main class="deck-stage" id="deckStage">
+
+      <!-- ============ COVER ============ -->
+      <section class="slide title-slide active" data-title="封面">
+        <div class="paper">
+          <div class="title-meta"><span class="pill">Tutorial 01</span><span>Behavioural Economics</span></div>
+          <div class="title-block">
+            <h1 class="reveal" data-editable>行为经济学与在线实验入门<span class="english">Introduction to Behavioral Economics</span></h1>
+            <p class="sub reveal">经济学全景 · 行为偏差 · 因果推断 · 实验论文结构</p>
+          </div>
+          <div class="title-plot">
+            <svg viewBox="0 0 500 475" aria-label="三大行为概念示意">
+              <text x="250" y="50" text-anchor="middle" font-family="DM Sans" font-size="22" font-weight="700" fill="#397a68">三大经典行为偏差</text>
+              <circle cx="120" cy="240" r="80" fill="#c84b49" opacity="0.82"/>
+              <text x="120" y="235" text-anchor="middle" font-family="DM Sans" font-size="17" font-weight="800" fill="white">Loss</text>
+              <text x="120" y="258" text-anchor="middle" font-family="DM Sans" font-size="17" font-weight="800" fill="white">Aversion</text>
+              <text x="120" y="280" text-anchor="middle" font-family="DM Sans" font-size="13" fill="white">损失厌恶</text>
+              <circle cx="250" cy="240" r="80" fill="#d6a84b" opacity="0.85"/>
+              <text x="250" y="235" text-anchor="middle" font-family="DM Sans" font-size="17" font-weight="800" fill="#3a2e15">Present</text>
+              <text x="250" y="258" text-anchor="middle" font-family="DM Sans" font-size="17" font-weight="800" fill="#3a2e15">Bias</text>
+              <text x="250" y="280" text-anchor="middle" font-family="DM Sans" font-size="13" fill="#3a2e15">当下偏差</text>
+              <circle cx="380" cy="240" r="80" fill="#214e73" opacity="0.85"/>
+              <text x="380" y="235" text-anchor="middle" font-family="DM Sans" font-size="17" font-weight="800" fill="white">Social</text>
+              <text x="380" y="258" text-anchor="middle" font-family="DM Sans" font-size="17" font-weight="800" fill="white">Pref.</text>
+              <text x="380" y="280" text-anchor="middle" font-family="DM Sans" font-size="13" fill="white">社会偏好</text>
+              <text x="250" y="410" text-anchor="middle" font-family="DM Sans" font-size="16" fill="#666a65">Today's Paper: Buratto &amp; Lotti (2023)</text>
+              <text x="250" y="438" text-anchor="middle" font-family="DM Sans" font-size="14" fill="#888">食品标签 · 选择过载 · 显著性 · 过度自信</text>
+            </svg>
+          </div>
+          <div class="title-paper-info">
+            <strong>案例论文：Buratto &amp; Lotti (2023)</strong><br>
+            食品标签与可持续性判断（在线实验）<br>
+            TA: Ray · Renmin University of China · 2026.07.15
+          </div>
+          <div class="title-tabs">
+            <span style="background:var(--mint)">全景</span>
+            <span style="background:var(--lavender)">行为</span>
+            <span style="background:var(--pink)">实验</span>
+            <span style="background:var(--sky)">案例</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PART 1: 经济学全景 ============ -->
+      <section class="slide section-break" data-tab="全景" style="--tab-color:var(--mint)" data-title="Part 1 经济学全景">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">01</div>
+          <div>
+            <div class="eyebrow reveal">Part 1</div>
+            <h2 class="reveal" data-editable>经济学全景</h2>
+            <p class="reveal">经济学的核心定义、微观与宏观的分野，以及若干主要应用领域。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="全景" style="--tab-color:var(--mint)" data-title="经济学是什么">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">全景</div>
+          <h2 class="slide-title reveal" data-editable>经济学是什么？<span class="en">What is Economics?</span></h2>
+          <div class="definition-band reveal"><b>核心定义</b><span>研究<strong>稀缺资源</strong>如何被分配以满足无限需求的学科。它关乎决策（decision-making）的思维框架，不只是金钱。</span></div>
+          <div class="lead reveal" style="margin:14px 0 18px;font-size:28px">标准模型的三个基石：</div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card blue"><h3>稀缺性 Scarcity</h3><p>资源（时间、预算、自然资源）总是有限的。</p></div>
+            <div class="card green"><h3>理性 Rationality</h3><p>个体在约束条件下追求效用最大化（utility maximization）。</p></div>
+            <div class="card gold"><h3>均衡 Equilibrium</h3><p>供给与需求相等时的稳定状态。</p></div>
+          </div>
+          <div class="callout blue reveal" style="margin-top:18px"><em>"People respond to incentives."</em>　人们会对激励做出反应。</div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="全景" style="--tab-color:var(--mint)" data-title="微观与宏观">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">全景</div>
+          <h2 class="slide-title reveal" data-editable>经济学版图：微观与宏观<span class="en">Micro vs. Macro</span></h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>微观经济学 Microeconomics</h3><p class="muted" style="margin-bottom:10px"><strong>研究对象</strong>：个体单位（消费者、企业）。</p><ul class="clean"><li>价格是如何形成的？</li><li>企业如何在寡头市场中竞争？</li><li>征收糖税如何影响可乐的销量？</li></ul></div>
+            <div class="card green"><h3>宏观经济学 Macroeconomics</h3><p class="muted" style="margin-bottom:10px"><strong>研究对象</strong>：整体经济运行。</p><ul class="clean"><li>通货膨胀（inflation）的成因是什么？</li><li>中央银行加息如何影响 GDP 增长？</li><li>经济周期的波动来源是什么？</li></ul></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="全景" style="--tab-color:var(--mint)" data-title="应用领域举例">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">全景</div>
+          <h2 class="slide-title reveal" data-editable>应用领域举例<span class="en">Applied Fields</span></h2>
+          <div class="lead reveal" style="margin-bottom:18px">经济学家把"理性分析框架"应用到了广泛的社会议题中。</div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card blue"><h3>劳动经济学 Labor</h3><p class="muted"><strong>关注</strong>：工资、就业、人力资本、移民。<br><strong>例</strong>：最低工资法是否会导致失业率上升？</p></div>
+            <div class="card green"><h3>发展经济学 Development</h3><p class="muted"><strong>关注</strong>：贫困陷阱、健康与教育。<br><strong>例</strong>：给贫困家庭现金补贴能否提高儿童入学率？</p></div>
+            <div class="card gold"><h3>环境经济学 Environmental</h3><p class="muted"><strong>关注</strong>：外部性、公共品、气候变化。<br><strong>例</strong>：碳交易系统是否比碳税更有效？</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 2: 行为经济学 ============ -->
+      <section class="slide section-break" data-tab="行为" style="--tab-color:var(--lavender)" data-title="Part 2 行为经济学">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">02</div>
+          <div>
+            <div class="eyebrow reveal">Part 2</div>
+            <h2 class="reveal" data-editable>行为经济学</h2>
+            <p class="reveal">引入有限理性，用三个经典案例展示系统性行为偏差。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="行为" style="--tab-color:var(--lavender)" data-title="引入行为经济学">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">行为</div>
+          <h2 class="slide-title reveal" data-editable>引入行为经济学<span class="en">Enter Behavioral Economics</span></h2>
+          <div class="callout reveal" style="margin-bottom:18px"><strong>传统模型的挑战：</strong>传统经济学假设人是 <em>Homo Economicus</em>——完全理性、完全自利、拥有无限意志力。<br>现实是人类经常犯<strong>系统性</strong>的错误。</div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card blue"><h3>跨学科</h3><p>结合<strong>心理学</strong>与经济学的洞察。</p></div>
+            <div class="card green"><h3>有限理性</h3><p>用 <strong>Bounded Rationality</strong> 取代"完全理性"。</p></div>
+            <div class="card red"><h3>研究偏差</h3><p>研究人们决策中的 <strong>Biases</strong>。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="行为" style="--tab-color:var(--lavender)" data-title="损失厌恶">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">行为</div>
+          <h2 class="slide-title reveal" data-editable>经典案例 I：损失厌恶<span class="en">Loss Aversion</span></h2>
+          <div class="definition-band warning reveal"><b>前景理论 Prospect Theory</b><span><em>"Losses loom larger than gains."</em>　损失带来的痛苦感，远大于同等收益带来的快乐感。</span></div>
+          <div class="formula-block reveal" style="margin:18px 0;font-size:42px">V(x) &lt; |V(−x)|　<span class="muted" style="font-size:28px">for x &gt; 0</span></div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>金融市场 · 处置效应</h3><p>投资者倾向过早卖出赚钱的股票（落袋为安），却死抱亏钱的股票不放（不愿面对损失）。</p></div>
+            <div class="card gold"><h3>营销策略</h3><p>"试用期一个月，不满意退款"。商品一旦拿回家，再退回去的感觉就像损失，于是多数人选择保留。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="行为" style="--tab-color:var(--lavender)" data-title="当下偏差">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">行为</div>
+          <h2 class="slide-title reveal" data-editable>经典案例 II：当下偏差<span class="en">Present Bias</span></h2>
+          <div class="definition-band reveal"><b>时间不一致性 Time Inconsistency</b><span>我们总是计划在未来做一个"有耐心"的人，但在当下却总是急躁。</span></div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>场景模拟</h3><p><strong>周日的计划</strong>：周一晚上复习 4 小时宏观经济学。<br><strong>周一的行动</strong>：算了，先看两集 Netflix，明天再复习。</p></div>
+            <div class="card green"><h3>承诺机制 Commitment Devices</h3><p>为对抗未来意志力薄弱，使用<strong>硬约束</strong>：<br>· 购买健身房年卡（沉没成本）<br>· 设定自动转账的储蓄账户</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="行为" style="--tab-color:var(--lavender)" data-title="社会偏好与助推">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">行为</div>
+          <h2 class="slide-title reveal" data-editable>经典案例 III：社会偏好与助推</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><div class="number" style="font-size:60px">1</div><h3>社会偏好 Social Preferences</h3><ul class="clean"><li>人并非纯粹自利，还在乎<strong>公平</strong>与<strong>互惠</strong></li><li><strong>证据</strong>：独裁者博弈（Dictator Game）中，即使完全分配权且匿名，多数人仍分给对方 <strong>20%–30%</strong></li></ul></div>
+            <div class="card green"><div class="number" style="font-size:60px">2</div><h3>助推理论 Nudge Theory (Thaler)</h3><ul class="clean"><li>改变<strong>选择架构</strong>引导行为，不改变激励</li><li><strong>经典例子</strong>：养老金储蓄从"主动加入"改为"默认加入（可退出）"，参与率大幅提升</li></ul></div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 3: 实验经济学与因果推断 ============ -->
+      <section class="slide section-break" data-tab="实验" style="--tab-color:var(--pink)" data-title="Part 3 实验与因果">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">03</div>
+          <div>
+            <div class="eyebrow reveal">Part 3</div>
+            <h2 class="reveal" data-editable>实验经济学与因果推断</h2>
+            <p class="reveal">实验工具箱、相关 ≠ 因果、反事实难题，以及随机对照试验为何是黄金标准。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="实验" style="--tab-color:var(--pink)" data-title="实验经济学工具箱">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实验</div>
+          <h2 class="slide-title reveal" data-editable>实验经济学：工具箱<span class="en">The Toolkit</span></h2>
+          <div class="lead reveal" style="margin-bottom:18px">如何验证行为理论？靠数据说话。</div>
+          <table class="data-table reveal">
+            <thead><tr><th>类型</th><th>特点</th></tr></thead>
+            <tbody>
+              <tr><td><strong>实验室实验<br>Lab Experiment</strong></td><td>受控环境，任务抽象（如分钱游戏）。<strong style="color:var(--blue)">内部效度高</strong>，容易复现。</td></tr>
+              <tr><td><strong>实地实验<br>Field Experiment</strong></td><td>真实世界（学校、工厂）。受试者通常不知情。<strong style="color:var(--blue)">外部效度高</strong>，更接近真实行为。</td></tr>
+              <tr><td><strong>在线实验<br>Online Experiment</strong></td><td>基于网络调查（MTurk、Prolific）。样本量大且多样化，成本低、速度快。<strong style="color:var(--red)">→ 今日案例论文采用此方法。</strong></td></tr>
+            </tbody>
+          </table>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="实验" style="--tab-color:var(--pink)" data-title="相关性 ≠ 因果性">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实验</div>
+          <h2 class="slide-title reveal" data-editable>核心挑战：相关性 ≠ 因果性</h2>
+          <div class="callout reveal" style="margin-bottom:18px"><strong>Correlation is not Causation.</strong>　仅仅因为 X 和 Y 一起变动，并不代表 X 导致了 Y。</div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>经典误区：冰淇淋 &amp; 鲨鱼袭击</h3><ul class="clean"><li><strong>数据</strong>：冰淇淋销量越高，鲨鱼袭击次数越多（高度正相关）</li><li><strong>结论</strong>：吃冰淇淋会吸引鲨鱼吗？当然不会</li><li><strong>遗漏变量</strong>：<strong>气温</strong></li><li>天气热 → 游泳（被袭击概率 ↑）+ 吃冰淇淋</li></ul></div>
+            <div class="card blue"><h3>分解公式</h3><div class="formula-block" style="font-size:28px;padding:24px">Correlation<br>= Causality<br>+ Selection Bias<br><span class="muted" style="font-size:22px">（选择性偏差）</span></div></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="实验" style="--tab-color:var(--pink)" data-title="因果推断的根本问题">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实验</div>
+          <h2 class="slide-title reveal" data-editable>因果推断的根本问题</h2>
+          <div class="lead reveal" style="margin-bottom:14px">要了解干预（T）对结果（Y）的影响，需要比较：</div>
+          <div class="formula-block reveal" style="margin-bottom:24px;font-size:38px">Impact = Y<sub>i</sub>(受干预) − Y<sub>i</sub>(未受干预)</div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card red"><h3>反事实难题 The Counterfactual Problem</h3><p>我们永远无法在同一时间观测到同一个体既"吃了药"又"没吃药"的状态。</p></div>
+            <div class="card gold"><h3>简单的比较行不通</h3><p>直接比较"主动选择吃药的人"和"不吃药的人"，会引入<strong>选择性偏差</strong>。<br><span class="muted">例：吃药的人本身可能病情更重，或更关注健康。</span></p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="实验" style="--tab-color:var(--pink)" data-title="黄金标准 RCT">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实验</div>
+          <h2 class="slide-title reveal" data-editable>黄金标准：随机对照试验<span class="en">RCT</span></h2>
+          <div class="definition-band reveal"><b>随机化 Randomization</b><span>通过掷硬币或随机数生成，将受试者分配到<strong>处理组（Treatment）</strong>或<strong>对照组（Control）</strong>。</span></div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card blue"><h3>打破关联</h3><p>随机化打破受试者特征与干预选择之间的关联。</p></div>
+            <div class="card green"><h3>统计等同</h3><p>两组人在干预之前，在统计上完全一样（年龄、性别、动机等均值相同）。</p></div>
+            <div class="card gold"><h3>差异 = 因果</h3><p>干预后两组结果的任何差异，只能归因于干预本身。</p></div>
+          </div>
+          <div class="formula-block reveal" style="margin-top:18px;font-size:32px">E[Y|T=1] − E[Y|T=0] = <span style="color:var(--red)">Causal Effect（因果效应）</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="实验" style="--tab-color:var(--pink)" data-title="实验设计的基本要素">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实验</div>
+          <h2 class="slide-title reveal" data-editable>好的实验设计包含什么？</h2>
+          <div class="lead reveal" style="margin-bottom:18px">阅读实验论文时，关注以下四个要素：</div>
+          <div class="grid-4 lesson-grid reveal">
+            <div class="card blue"><div class="number" style="font-size:56px">1</div><h3>假设 Hypothesis</h3><p>基于理论，你预测会发生什么？</p></div>
+            <div class="card green"><div class="number" style="font-size:56px">2</div><h3>处理 Treatments</h3><p>具体的干预手段是什么？（如改变标签颜色、增减选项数量）</p></div>
+            <div class="card gold"><div class="number" style="font-size:56px">3</div><h3>结果变量 Outcome</h3><p>如何衡量成功？（如准确率、购买意愿）</p></div>
+            <div class="card red"><div class="number" style="font-size:56px">4</div><h3>机制 Mechanism</h3><p>为什么干预会起作用？（如是否因为"过度自信"）</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ PART 4: 案例与论文结构 ============ -->
+      <section class="slide section-break" data-tab="案例" style="--tab-color:var(--sky)" data-title="Part 4 案例与论文">
+        <div class="paper"><div class="content">
+          <div class="section-index reveal">04</div>
+          <div>
+            <div class="eyebrow reveal">Part 4</div>
+            <h2 class="reveal" data-editable>案例与论文结构</h2>
+            <p class="reveal">把概念落到 Buratto &amp; Lotti (2023) 上，按 IMRaD 结构走完一遍实验论文阅读。</p>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="总结与今日案例过渡">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例</div>
+          <h2 class="slide-title reveal" data-editable>总结与今日案例过渡</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card green"><h3>本节前半总结</h3><ul class="clean"><li><strong>经济学</strong>研究稀缺下的选择</li><li><strong>行为经济学</strong>修正了理性假设</li><li><strong>实验（RCT）</strong>是建立因果关系、验证行为理论的科学工具</li></ul></div>
+            <div class="card blue"><h3>Today's Paper: Buratto &amp; Lotti (2023)</h3><ul class="clean"><li><strong>方法</strong>：Online Experiment（在线实验）</li><li><strong>主题</strong>：食品标签与可持续性判断</li><li><strong>核心概念</strong>：<ul style="margin-top:6px;padding-left:18px"><li>Choice Overload（选择过载）</li><li>Salience（显著性）</li><li>Overconfidence（过度自信）</li></ul></li></ul></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="研究问题">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例</div>
+          <h2 class="slide-title reveal" data-editable>研究问题与核心概念</h2>
+          <div class="lead reveal" style="margin-bottom:18px">通过在线实验，作者试图回答：</div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card blue"><h3>判断准确性</h3><p>消费者能否准确识别食品的环保程度？</p></div>
+            <div class="card green"><h3>外部干扰</h3><p>当选项变多（选择过载）或有显眼标签（显著性）时，判断力如何变化？</p></div>
+            <div class="card red"><h3>内部因素</h3><p>消费者的"迷之自信"（过度自信）是否会降低决策质量？</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="核心概念定义">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例</div>
+          <h2 class="slide-title reveal" data-editable>核心行为概念定义</h2>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card blue"><h3>1. Choice Overload<br><span style="font-size:22px;color:var(--muted)">选择过载</span></h3><p>传统经济学认为"选项越多越好"，但行为经济学发现，选项过多（本实验从 4 个增至 8 个）会增加认知负担，导致决策质量下降或放弃选择。</p></div>
+            <div class="card green"><h3>2. Salience<br><span style="font-size:22px;color:var(--muted)">显著性</span></h3><p>信息在环境中"脱颖而出"吸引注意力的程度。本实验通过在商品上添加绿色标签实现（含真实与误导性标签）。</p></div>
+            <div class="card red"><h3>3. Overconfidence<br><span style="font-size:22px;color:var(--muted)">过度自信</span></h3><p>个体高估自身知识水平或判断准确性的心理偏差。本研究对比了受试者"自认为的得分"与"实际得分"。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="实验论文 IMRaD 结构">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例</div>
+          <h2 class="slide-title reveal" data-editable>实验论文的标准结构<span class="en">IMRaD</span></h2>
+          <div class="lead reveal" style="margin-bottom:18px">通常遵循 IMRaD 结构，呈现"沙漏型"逻辑（宽 → 窄 → 宽）。</div>
+          <div class="process reveal" style="grid-template-columns:repeat(4,1fr)">
+            <div><b>1</b><span><strong>Introduction</strong><br>为什么这个问题重要？提出什么假设？</span></div>
+            <div><b>2</b><span><strong style="color:var(--red)">Method（最关键）</strong><br>实验如何设计？处理是什么？怎么招募的人？</span></div>
+            <div><b>3</b><span><strong>Results</strong><br>数据长什么样？假设是否被验证？只陈述事实。</span></div>
+            <div><b>4</b><span><strong>Discussion</strong><br>结果意味着什么？政策建议？局限性？</span></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="引言 Introduction">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例 · IMRaD 1/4</div>
+          <h2 class="slide-title reveal" data-editable>引言：提出问题与假设</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>写作要点</h3><ul class="clean"><li><strong>Motivation</strong>：现实世界的问题（气候变化、食品排放）</li><li><strong>Gap</strong>：现有文献缺什么？（如：标签有用，但在"选择过载"下还有没有用？）</li><li><strong>Hypotheses</strong>：基于理论提出具体的、可验证的预测</li></ul></div>
+            <div class="card green"><h3>Case Study: Buratto &amp; Lotti (2023)</h3><ul class="clean"><li><strong style="color:var(--blue)">H1 (Salience)</strong>：显著的绿色标签会提高判断准确率</li><li><strong style="color:var(--blue)">H3 (Choice Overload)</strong>：选项过多会导致准确率下降</li><li><strong style="color:var(--blue)">H5 (Overconfidence)</strong>：对知识的过度自信与低准确率相关</li></ul></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="方法 Method">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例 · IMRaD 2/4</div>
+          <h2 class="slide-title reveal" data-editable>方法：实验蓝图</h2>
+          <div class="callout reveal" style="margin-bottom:18px"><strong>核心要素（Must-Haves）：</strong>实验经济学论文必须极其透明，以便他人复现（replication）。</div>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><h3>Design 设计</h3><p><strong>Within-subject（组内设计）</strong>：每个受试者都要经历所有场景（无标签、有真标签、有假标签 × 选项少、选项多）。</p></div>
+            <div class="card green"><h3>Treatments 处理</h3><p>控制组（4 个选项）vs. 实验组（8 个选项 / 加标签）。</p></div>
+            <div class="card gold"><h3>Participants 被试</h3><p>336 名受试者，来自 Amazon MTurk（在线众包平台），来自英国和意大利。</p></div>
+            <div class="card red"><h3>Incentives 激励</h3><p>使用 $0.50 参与费。<br><span class="muted">注意：严格的实验经济学通常要求 performance-based payment。</span></p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="结果 Results">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例 · IMRaD 3/4</div>
+          <h2 class="slide-title reveal" data-editable>结果：描述与推断</h2>
+          <div class="grid-2 lesson-grid reveal">
+            <div class="card blue"><div class="number" style="font-size:48px">Step 1</div><h3>描述性统计 Descriptive Statistics</h3><ul class="clean"><li>数据的基本面貌（均值、分布）</li><li><strong style="color:var(--blue)">Case</strong>：受试者平均准确率为 <strong>64%–76%</strong>；大家都稍微有点"迷之自信"</li></ul></div>
+            <div class="card green"><div class="number" style="font-size:48px">Step 2</div><h3>回归分析 / 假设检验</h3><ul class="clean"><li>使用 OLS、Probit、Tobit 检验 X 是否导致 Y</li><li><strong style="color:var(--blue)">Case</strong>：使用线性回归与 Tobit 模型</li><li><strong style="color:var(--red)">Finding 1</strong>：选项过载显著降低准确率（支持 H3）</li><li><strong style="color:var(--red)">Finding 2</strong>：选项多时，真实标签能显著提升准确率</li></ul></div>
+          </div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="案例" style="--tab-color:var(--sky)" data-title="讨论与局限性">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">案例 · IMRaD 4/4</div>
+          <h2 class="slide-title reveal" data-editable>讨论：局限性与意义</h2>
+          <div class="definition-band reveal" style="margin-bottom:18px"><b>Implications</b><span>超市货架应避免堆砌太多同类商品；商品繁多时，必须强制使用真实、显著的绿色标签辅助消费者。</span></div>
+          <div class="callout reveal" style="margin-bottom:14px"><strong>局限性 Limitations —— 诚实是这一节的关键。</strong>没有完美的实验，必须主动承认潜在问题：</div>
+          <div class="grid-3 lesson-grid reveal">
+            <div class="card red"><h3>外部效度 External Validity</h3><p>在线看图片买东西 ≠ 真实的超市购物体验。</p></div>
+            <div class="card gold"><h3>样本代表性 Sample</h3><p>MTurk 的网民群体可能比普通大众受教育程度更高。</p></div>
+            <div class="card blue"><h3>标志识别</h3><p>部分受试者可能根本没注意到那个绿色的标签。</p></div>
+          </div>
+        </div></div>
+      </section>
+
+      <!-- ============ CLOSING ============ -->
+      <section class="slide" data-tab="完成" style="--tab-color:var(--cream)" data-title="课程结束">
+        <div class="paper"><div class="content center">
+          <div>
+            <div class="eyebrow reveal">课程结束</div>
+            <h2 class="big-idea reveal" data-editable>从概念到证据<br>从相关到因果</h2>
+            <p class="lead reveal" style="margin:24px auto 0">经济学 · 行为偏差 · 实验方法 · IMRaD 论文结构。</p>
+            <div class="accent-rule reveal" style="margin:32px auto"></div>
+            <div class="chips reveal" style="justify-content:center">
+              <span class="chip">L1 入门（完成）</span>
+              <span class="chip key">L2 理论精读</span>
+              <span class="chip">L3 在线实验设计</span>
+            </div>
+          </div>
+        </div><div class="source">Case paper: Buratto &amp; Lotti (2023). Food labels and sustainability judgment.</div></div>
+      </section>
+
+    </main>
+  </div>
+
+  <div class="deck-controls" aria-label="课件导航">
+    <button id="prevBtn" aria-label="上一页">←</button>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="page-counter" id="pageCounter">1 / 1</span>
+    <button id="nextBtn" aria-label="下一页">→</button>
+  </div>
+  <div class="edit-hotzone" aria-label="显示编辑按钮"></div>
+  <button class="edit-toggle" id="editToggle" title="编辑模式（E）">✎</button>
+  <aside class="overview" id="overview"><h2>课件概览 · 按 O 返回</h2><div class="overview-grid" id="overviewGrid"></div></aside>
+
+  <script>
+    class SlidePresentation {
+      constructor() {
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.stage = document.getElementById('deckStage');
+        this.currentSlide = 0;
+        this.touchStartX = 0;
+        this.wheelLocked = false;
+        this.injectFooters();
+        this.buildOverview();
+        this.setupStageScale();
+        this.setupNavigation();
+        this.showSlide(this.indexFromHash());
+      }
+
+      injectFooters() {
+        this.slides.forEach((slide, index) => {
+          if (slide.classList.contains('title-slide')) return;
+          const paper = slide.querySelector('.paper');
+          if (!paper) return;
+          const footer = document.createElement('div');
+          footer.className = 'auto-footer';
+          footer.textContent = `${index + 1} / ${this.slides.length}`;
+          paper.appendChild(footer);
+        });
+      }
+
+      setupStageScale() {
+        const scale = () => {
+          const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+          const x = (window.innerWidth - 1920 * factor) / 2;
+          const y = (window.innerHeight - 1080 * factor) / 2;
+          this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+      }
+
+      indexFromHash() {
+        const n = Number(location.hash.replace('#',''));
+        return Number.isFinite(n) && n >= 1 ? n - 1 : 0;
+      }
+
+      hiddenFragments() {
+        return [...this.slides[this.currentSlide].querySelectorAll('.fragment:not(.shown)')];
+      }
+
+      next() {
+        const hidden = this.hiddenFragments();
+        if (hidden.length) { hidden[0].classList.add('shown'); return; }
+        this.showSlide(this.currentSlide + 1);
+      }
+
+      previous() {
+        const shown = [...this.slides[this.currentSlide].querySelectorAll('.fragment.shown')];
+        if (shown.length) { shown[shown.length - 1].classList.remove('shown'); return; }
+        this.showSlide(this.currentSlide - 1);
+      }
+
+      showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === this.currentSlide);
+          slide.classList.toggle('visible', i === this.currentSlide);
+          if (i !== this.currentSlide) slide.querySelectorAll('.fragment.shown').forEach(el => el.classList.remove('shown'));
+        });
+        history.replaceState(null, '', `#${this.currentSlide + 1}`);
+        document.getElementById('pageCounter').textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+        document.getElementById('progressFill').style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+        [...document.querySelectorAll('#overviewGrid button')].forEach((btn, i) => btn.classList.toggle('current', i === this.currentSlide));
+      }
+
+      buildOverview() {
+        const grid = document.getElementById('overviewGrid');
+        this.slides.forEach((slide, i) => {
+          const btn = document.createElement('button');
+          btn.innerHTML = `<strong>${String(i + 1).padStart(2,'0')}</strong><br>${slide.dataset.title || 'Untitled'}`;
+          btn.addEventListener('click', () => { this.showSlide(i); this.toggleOverview(false); });
+          grid.appendChild(btn);
+        });
+      }
+
+      toggleOverview(force) {
+        const panel = document.getElementById('overview');
+        panel.classList.toggle('open', typeof force === 'boolean' ? force : !panel.classList.contains('open'));
+      }
+
+      setupNavigation() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.previous());
+        document.addEventListener('keydown', event => {
+          if (event.target.getAttribute?.('contenteditable') === 'true') return;
+          if (['ArrowRight','ArrowDown',' ','PageDown'].includes(event.key)) { event.preventDefault(); this.next(); }
+          if (['ArrowLeft','ArrowUp','PageUp'].includes(event.key)) { event.preventDefault(); this.previous(); }
+          if (event.key === 'Home') this.showSlide(0);
+          if (event.key === 'End') this.showSlide(this.slides.length - 1);
+          if (event.key.toLowerCase() === 'o') this.toggleOverview();
+          if (event.key === 'Escape') this.toggleOverview(false);
+        });
+        this.stage.addEventListener('click', event => {
+          if (event.target.closest('button,[contenteditable="true"]')) return;
+          this.next();
+        });
+        this.stage.addEventListener('touchstart', event => { this.touchStartX = event.changedTouches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', event => {
+          const delta = event.changedTouches[0].clientX - this.touchStartX;
+          if (Math.abs(delta) > 50) delta < 0 ? this.next() : this.previous();
+        }, { passive: true });
+        window.addEventListener('wheel', event => {
+          if (this.wheelLocked || Math.abs(event.deltaY) < 18) return;
+          this.wheelLocked = true;
+          event.deltaY > 0 ? this.next() : this.previous();
+          setTimeout(() => this.wheelLocked = false, 550);
+        }, { passive: true });
+      }
+    }
+
+    class InlineEditor {
+      constructor() {
+        this.isActive = false;
+        this.nodes = [...document.querySelectorAll('[data-editable]')];
+        this.restore();
+        this.setupToggle();
+      }
+      setupToggle() {
+        const hotzone = document.querySelector('.edit-hotzone');
+        const toggle = document.getElementById('editToggle');
+        let hideTimeout = null;
+        const show = () => { clearTimeout(hideTimeout); toggle.classList.add('show'); };
+        const hide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) toggle.classList.remove('show'); }, 400); };
+        hotzone.addEventListener('mouseenter', show); hotzone.addEventListener('mouseleave', hide);
+        toggle.addEventListener('mouseenter', show); toggle.addEventListener('mouseleave', hide);
+        toggle.addEventListener('click', () => this.toggleEditMode());
+        hotzone.addEventListener('click', () => this.toggleEditMode());
+        document.addEventListener('keydown', event => {
+          if ((event.key === 'e' || event.key === 'E') && event.target.getAttribute?.('contenteditable') !== 'true') this.toggleEditMode();
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') { event.preventDefault(); this.download(); }
+        });
+      }
+      toggleEditMode() {
+        this.isActive = !this.isActive;
+        document.body.classList.toggle('editing', this.isActive);
+        document.getElementById('editToggle').classList.toggle('active', this.isActive);
+        this.nodes.forEach((node, index) => {
+          node.contentEditable = this.isActive ? 'true' : 'false';
+          node.oninput = () => localStorage.setItem(`ben-intro-edit-${index}`, node.innerHTML);
+        });
+      }
+      restore() {
+        this.nodes.forEach((node, index) => {
+          const saved = localStorage.getItem(`ben-intro-edit-${index}`);
+          if (saved) node.innerHTML = saved;
+        });
+      }
+      download() {
+        const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = 'tutorial-01-intro-edited.html'; link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      }
+    }
+
+    window.presentation = new SlidePresentation();
+    window.editor = new InlineEditor();
+  </script>
+</body>
+</html>

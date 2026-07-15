@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="面向零统计学基础学生的回归表阅读互动课件：变量、OLS、系数、统计推断、多元回归、问卷量表与 Tobit。">
+  <title>Tutorial 03｜读懂回归表：从 OLS 到 Tobit</title>
+
+  <!-- === TYPOGRAPHY: Google Fonts with CJK support === -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600;6..96,700&amp;family=DM+Sans:wght@400;500;600;700&amp;family=Noto+Sans+SC:wght@400;500;600;700;900&amp;family=Noto+Serif+SC:wght@600;700;900&amp;display=swap" rel="stylesheet">
+
+  <style>
+    /* === THEME TOKENS: Notebook Tabs === */
+    :root {
+      --stage-bg: #292929;
+      --slide-bg: #292929;
+      --paper: #f8f6f1;
+      --paper-deep: #eeeae0;
+      --ink: #191a18;
+      --muted: #666a65;
+      --blue: #214e73;
+      --blue-soft: #e3edf5;
+      --green: #397a68;
+      --green-soft: #dcece6;
+      --red: #c84b49;
+      --red-soft: #f4dfdc;
+      --gold: #d6a84b;
+      --gold-soft: #f5e9c9;
+      --lavender: #c7b8ea;
+      --pink: #f4b8c5;
+      --sky: #a8d8ea;
+      --mint: #98d4bb;
+      --cream: #ffe6a7;
+      --font-display: "Bodoni Moda", "Noto Serif SC", serif;
+      --font-cjk-display: "Noto Serif SC", serif;
+      --font-body: "DM Sans", "Noto Sans SC", sans-serif;
+      --ease-out: cubic-bezier(.16, 1, .3, 1);
+      --shadow: 0 28px 72px rgba(0,0,0,.28);
+    }
+
+    /* === RESET === */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button { font: inherit; }
+
+    /* ===========================================
+       FIXED 16:9 STAGE: MANDATORY BASE STYLES
+       Include this ENTIRE file in every presentation.
+       Slides are authored at 1920×1080 and scaled as a whole.
+       =========================================== */
+
+    /* 1. Lock the browser viewport */
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--stage-bg, #000);
+    }
+
+    /* 2. Full-window deck viewport */
+    .deck-viewport {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: var(--stage-bg, #000);
+    }
+
+    /* 3. Fixed 16:9 design canvas.
+       JavaScript sets transform: translate(...) scale(...). */
+    .deck-stage {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        transform-origin: 0 0;
+        background: var(--slide-bg, #fff);
+    }
+
+    /* 4. Slides stack inside the fixed stage.
+       Content must be laid out at 1920×1080, not reflowed per device. */
+    .slide {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        background: var(--slide-bg, #fff);
+    }
+
+    .slide.active,
+    .slide.visible {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        z-index: 1;
+    }
+
+    /* 5. Keep media inside authored slide bounds */
+    img,
+    video,
+    canvas,
+    svg {
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    /* 6. Presentation chrome stays outside the slide design system */
+    .deck-controls {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%);
+        z-index: 1000;
+    }
+
+    /* 7. Print one fixed-size slide per page */
+    @media print {
+        html,
+        body {
+            width: 1920px;
+            height: auto;
+            overflow: visible;
+            background: #fff;
+        }
+
+        .deck-viewport {
+            position: static;
+            overflow: visible;
+            background: #fff;
+        }
+
+        .deck-stage {
+            position: static;
+            width: auto;
+            height: auto;
+            transform: none !important;
+            background: none;
+        }
+
+        .slide {
+            position: relative;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            width: 1920px;
+            height: 1080px;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        .slide:last-child {
+            break-after: auto;
+            page-break-after: auto;
+        }
+
+        .deck-controls {
+            display: none !important;
+        }
+    }
+
+    /* 8. Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.2s !important;
+        }
+    }
+
+    /* === NOTEBOOK PAPER SYSTEM === */
+    .paper {
+      position: absolute;
+      inset: 58px 88px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, transparent 0 104px, rgba(200,75,73,.14) 104px 107px, transparent 107px),
+        repeating-linear-gradient(0deg, transparent 0 56px, rgba(33,78,115,.05) 57px 58px),
+        var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .paper::after {
+      content: "";
+      position: absolute;
+      z-index: 8;
+      left: 22px;
+      top: 36px;
+      bottom: 36px;
+      width: 58px;
+      background: radial-gradient(circle, #292929 0 12px, #e7e3da 13px 20px, transparent 21px);
+      background-size: 58px 178px;
+      background-position: center 0;
+      pointer-events: none;
+    }
+    .slide::after {
+      content: attr(data-tab);
+      position: absolute;
+      right: 38px;
+      top: 170px;
+      z-index: 10;
+      width: 54px;
+      min-height: 174px;
+      padding: 20px 0;
+      border-radius: 0 18px 18px 0;
+      background: var(--tab-color, var(--mint));
+      color: #263332;
+      writing-mode: vertical-rl;
+      display: grid;
+      place-items: center;
+      font: 700 20px var(--font-body);
+      letter-spacing: .08em;
+    }
+    .title-slide::after { display: none; }
+    .content {
+      position: absolute;
+      inset: 54px 82px 76px 140px;
+      z-index: 2;
+      font-family: var(--font-body);
+      color: var(--ink);
+    }
+    .slide-title {
+      font: 900 66px/1.15 var(--font-cjk-display);
+      letter-spacing: -.035em;
+      color: var(--ink);
+      margin-bottom: 26px;
+    }
+    .slide-title .en { font: 600 28px var(--font-body); color: var(--green); letter-spacing: .02em; margin-left: 18px; }
+    .eyebrow { font: 700 18px var(--font-body); letter-spacing: .15em; text-transform: uppercase; color: var(--green); margin-bottom: 16px; }
+    .lead { font: 500 34px/1.55 var(--font-body); color: #323532; max-width: 1430px; }
+    .big-idea { font: 900 76px/1.2 var(--font-cjk-display); letter-spacing: -.04em; }
+    .number { font: 700 92px/1 var(--font-display); color: var(--red); }
+    .muted { color: var(--muted); }
+    .small { font-size: 21px; line-height: 1.5; }
+    .source { position: absolute; left: 140px; bottom: 23px; z-index: 3; font: 500 17px var(--font-body); color: #777b75; }
+    .auto-footer { position: absolute; right: 82px; bottom: 22px; z-index: 4; font: 600 17px var(--font-body); color: #777b75; }
+    .accent-rule { width: 126px; height: 7px; background: var(--red); margin: 28px 0; }
+
+    /* === LAYOUT PRIMITIVES === */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 34px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+    .stack { display: grid; gap: 18px; }
+    .center { display: grid; place-items: center; text-align: center; }
+    .card { background: rgba(255,255,255,.68); border: 2px solid #ded9cf; border-radius: 20px; padding: 26px 28px; box-shadow: 0 8px 22px rgba(40,38,33,.05); }
+    .card h3 { font: 800 30px/1.25 var(--font-body); margin-bottom: 12px; color: var(--blue); }
+    .card p, .card li { font: 500 25px/1.5 var(--font-body); }
+    .card.green { background: var(--green-soft); border-color: #bad9ce; }
+    .card.blue { background: var(--blue-soft); border-color: #bfd4e5; }
+    .card.red { background: var(--red-soft); border-color: #e6c0bb; }
+    .card.gold { background: var(--gold-soft); border-color: #e8d39d; }
+    .callout { border-left: 9px solid var(--red); padding: 20px 28px; background: rgba(244,223,220,.65); font: 700 30px/1.45 var(--font-body); }
+    .chips { display: flex; flex-wrap: wrap; gap: 12px; }
+    .chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 2px solid #cbc7bd; border-radius: 999px; background: #fffdf9; font: 700 20px var(--font-body); }
+    .chip.key { border-color: var(--green); color: var(--green); }
+    .arrow { font-size: 40px; color: var(--red); }
+    ul.clean { list-style: none; display: grid; gap: 16px; }
+    ul.clean li { position: relative; padding-left: 32px; font: 500 27px/1.45 var(--font-body); }
+    ul.clean li::before { content: "◆"; position: absolute; left: 0; top: 4px; font-size: 16px; color: var(--green); }
+    .formula { display: inline-flex; align-items: center; gap: 18px; padding: 18px 28px; background: #fffdf9; border: 2px solid #d8d2c6; border-radius: 18px; font: 600 38px var(--font-body); letter-spacing: .02em; }
+    .formula .beta { font: 700 54px var(--font-display); color: var(--red); }
+    .equals { color: #8b8e89; }
+
+    /* === TABLES AND REGRESSION OUTPUT === */
+    .reg-table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,.72); font: 500 20px/1.25 var(--font-body); }
+    .reg-table th, .reg-table td { padding: 10px 12px; text-align: center; border-bottom: 1px solid #ded9d0; transition: opacity .2s, background .2s, color .2s; }
+    .reg-table th:first-child, .reg-table td:first-child { text-align: left; font-weight: 700; }
+    .reg-table thead tr:first-child { border-top: 3px solid var(--ink); }
+    .reg-table thead tr:last-child { border-bottom: 2px solid var(--ink); }
+    .reg-table tbody tr:last-child { border-bottom: 3px solid var(--ink); }
+    .reg-table .se { color: var(--muted); font-size: .86em; }
+    .reg-table .sig { color: var(--red); font-weight: 900; }
+    .reg-table .focus { background: #fff0b8; color: #111; }
+    .dense-table { font-size: 16px; }
+    .dense-table th, .dense-table td { padding: 7px 8px; }
+    .table-spotlight[data-mode="row"] tr:not(.target-row) td { opacity: .18; }
+    .table-spotlight[data-mode="row"] .target-row td { background: #fff0b8; }
+    .table-spotlight[data-mode="se"] td:not(.se-cell), .table-spotlight[data-mode="se"] th { opacity: .2; }
+    .table-spotlight[data-mode="footer"] tbody tr:not(.footer-row) td, .table-spotlight[data-mode="footer"] thead { opacity: .16; }
+
+    /* === DIAGRAMS AND PLOTS === */
+    .plot-card { position: relative; height: 560px; background: rgba(255,255,255,.66); border: 2px solid #dcd7cd; border-radius: 24px; padding: 24px; }
+    .plot-svg { width: 100%; height: 100%; overflow: visible; }
+    .axis-label { font: 600 19px var(--font-body); fill: #626660; }
+    .dot { fill: var(--green); stroke: #fff; stroke-width: 3; }
+    .fit-line { stroke: var(--red); stroke-width: 6; stroke-linecap: round; transition: d .45s var(--ease-out); }
+    .residual { stroke: var(--gold); stroke-width: 3; stroke-dasharray: 8 7; }
+    .dist { display: flex; align-items: flex-end; gap: 8px; height: 250px; padding: 0 18px 18px; border-bottom: 3px solid var(--ink); }
+    .bar { width: 28px; background: var(--mint); border-radius: 8px 8px 0 0; transition: height .45s var(--ease-out); }
+    .number-line { position: relative; height: 150px; border-bottom: 4px solid var(--ink); margin: 36px 34px 0; }
+    .number-line .zero { position: absolute; left: 50%; bottom: -18px; width: 3px; height: 120px; background: var(--muted); }
+    .ci { position: absolute; height: 8px; background: var(--blue); border-radius: 6px; bottom: 50px; }
+    .ci::before, .ci::after { content: ""; position: absolute; top: -10px; width: 5px; height: 28px; background: var(--blue); }
+    .ci::before { left: 0; } .ci::after { right: 0; }
+    .ci .point { position: absolute; left: 50%; top: 50%; width: 20px; height: 20px; border-radius: 50%; transform: translate(-50%,-50%); background: var(--red); border: 3px solid white; }
+
+    /* === TIMELINES, STEPS, AND MODEL FLOW === */
+    .steps { display: grid; grid-template-columns: repeat(6,1fr); gap: 16px; margin-top: 35px; }
+    .step { min-height: 214px; border-radius: 22px; padding: 22px 18px; background: #fffdf9; border: 2px solid #dcd7cd; }
+    .step b { display: block; font: 700 45px var(--font-display); color: var(--red); margin-bottom: 10px; }
+    .step h3 { font: 800 24px var(--font-body); margin-bottom: 8px; color: var(--blue); }
+    .step p { font: 500 20px/1.42 var(--font-body); color: #515550; }
+    .flow { display: flex; align-items: stretch; justify-content: center; gap: 18px; margin-top: 30px; }
+    .flow-node { width: 360px; min-height: 210px; border-radius: 24px; background: #fffdf9; border: 3px solid #d7d1c5; padding: 26px; text-align: center; }
+    .flow-node h3 { font: 800 31px var(--font-body); color: var(--blue); margin-bottom: 12px; }
+    .flow-node p { font: 500 23px/1.5 var(--font-body); }
+
+    /* === BUTTONS, FRAGMENTS, AND FEEDBACK === */
+    .action { cursor: pointer; border: 0; border-radius: 999px; padding: 13px 22px; background: var(--blue); color: white; font: 700 20px var(--font-body); box-shadow: 0 7px 0 #17384f; transition: transform .12s, box-shadow .12s; }
+    .action:hover { transform: translateY(-2px); }
+    .action:active { transform: translateY(5px); box-shadow: 0 2px 0 #17384f; }
+    .action.alt { background: var(--green); box-shadow: 0 7px 0 #285648; }
+    .action.warn { background: var(--red); box-shadow: 0 7px 0 #8d3432; }
+    .fragment { opacity: .08; transform: translateY(16px); filter: blur(3px); transition: opacity .45s var(--ease-out), transform .45s var(--ease-out), filter .45s var(--ease-out); }
+    .fragment.shown { opacity: 1; transform: none; filter: none; }
+    .answer { min-height: 120px; margin-top: 20px; }
+    .feedback { font: 700 27px/1.45 var(--font-body); padding: 20px 24px; border-radius: 18px; background: var(--green-soft); border: 2px solid #b8d9cd; }
+
+    /* === TITLE SLIDE === */
+    .title-slide .paper { background: repeating-linear-gradient(0deg, transparent 0 56px, rgba(33,78,115,.055) 57px 58px), var(--paper); }
+    .title-meta { position: absolute; left: 160px; top: 94px; display: flex; align-items: center; gap: 24px; font: 700 19px var(--font-body); color: var(--muted); letter-spacing: .11em; text-transform: uppercase; }
+    .title-meta .pill { background: var(--mint); color: #23342e; padding: 10px 20px; border-radius: 999px; }
+    .title-block { position: absolute; left: 160px; top: 220px; width: 1020px; }
+    .title-block h1 { font: 900 112px/.98 var(--font-cjk-display); letter-spacing: -.055em; }
+    .title-block .english { display: block; margin-top: 14px; font: 700 64px/1.05 var(--font-display); color: var(--green); letter-spacing: -.035em; }
+    .title-block .sub { margin-top: 28px; font: 600 34px var(--font-body); color: #4c504b; }
+    .title-plot { position: absolute; right: 150px; top: 218px; width: 500px; height: 475px; }
+    .title-paper-info { position: absolute; left: 160px; bottom: 104px; font: 500 22px/1.65 var(--font-body); color: var(--muted); }
+    .title-paper-info strong { color: var(--ink); }
+    .title-tabs { position: absolute; right: 38px; top: 132px; display: grid; gap: 12px; z-index: 12; }
+    .title-tabs span { width: 54px; height: 120px; border-radius: 0 18px 18px 0; writing-mode: vertical-rl; display: grid; place-items: center; font: 700 17px var(--font-body); color: #263332; }
+
+    /* === SECTION BREAKS === */
+    .section-break .content { display: grid; grid-template-columns: 410px 1fr; align-items: center; gap: 54px; }
+    .section-index { font: 700 220px/1 var(--font-display); color: var(--tab-color); text-shadow: 4px 4px 0 #fff; }
+    .section-break h2 { font: 900 84px/1.15 var(--font-cjk-display); letter-spacing: -.04em; }
+    .section-break p { font: 500 31px/1.55 var(--font-body); margin-top: 22px; color: #50544f; max-width: 850px; }
+
+    /* === ANIMATIONS === */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .55s var(--ease-out), transform .55s var(--ease-out); }
+    .slide.visible .reveal { opacity: 1; transform: none; }
+    .slide.visible .reveal:nth-child(2) { transition-delay: .08s; }
+    .slide.visible .reveal:nth-child(3) { transition-delay: .16s; }
+    .slide.visible .reveal:nth-child(4) { transition-delay: .24s; }
+    .pulse { animation: pulse 1.8s infinite; }
+    @keyframes pulse { 50% { transform: scale(1.06); } }
+
+    /* === OUTSIDE-STAGE NAVIGATION === */
+    .deck-controls { display: flex; align-items: center; gap: 12px; padding: 9px 13px; border-radius: 999px; background: rgba(24,24,24,.8); backdrop-filter: blur(10px); opacity: .18; transition: opacity .25s; }
+    .deck-controls:hover { opacity: 1; }
+    .deck-controls button { width: 34px; height: 34px; border-radius: 50%; border: 0; color: white; background: #4d4d4d; cursor: pointer; }
+    .progress-track { width: 180px; height: 5px; border-radius: 5px; background: #646464; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--mint); width: 0; transition: width .25s; }
+    .page-counter { color: white; font: 600 13px var(--font-body); min-width: 58px; text-align: center; }
+    .edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+    .edit-toggle { position: fixed; top: 14px; left: 14px; z-index: 10001; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--red); color: white; opacity: 0; pointer-events: none; transition: opacity .3s; cursor: pointer; }
+    .edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+    body.editing [data-editable] { outline: 2px dashed var(--red); outline-offset: 4px; cursor: text; }
+    .overview { position: fixed; inset: 0; z-index: 9000; display: none; padding: 40px; overflow: auto; background: rgba(24,24,24,.96); color: white; font-family: var(--font-body); }
+    .overview.open { display: block; }
+    .overview h2 { font-size: 34px; margin-bottom: 22px; }
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 14px; }
+    .overview button { min-height: 92px; padding: 14px; border: 1px solid #666; border-radius: 14px; background: #343434; color: white; text-align: left; cursor: pointer; }
+    .overview button.current { border-color: var(--mint); background: #29473e; }
+  
+
+    /* === DEEP REVISION: definition, calculation and full-height teaching layouts === */
+    .slide:not(.section-break) .content:not(.center) { display:flex; flex-direction:column; }
+    .lesson-grid { min-height:0; align-items:start; align-content:center; margin-top:24px; }
+    .lesson-grid.compact, .lesson-grid.medium-grid, .lesson-grid.compact-grid { min-height:0; }
+    .content:not(.center) > .lesson-grid { flex:1 1 auto; }
+    .lesson-grid > .card { height:auto; align-self:start; }
+    .definition-band { display:flex; align-items:center; gap:26px; min-height:105px; margin:12px 0 24px; padding:20px 28px; border-left:9px solid var(--blue); background:var(--blue-soft); border-radius:0 18px 18px 0; font:500 27px/1.45 var(--font-body); }
+    .definition-band b { flex:0 0 auto; padding:9px 16px; border-radius:12px; background:var(--blue); color:white; font-size:22px; }
+    .definition-band.warning { border-color:var(--red); background:var(--red-soft); }
+    .definition-band.warning b { background:var(--red); }
+    .worked { display:grid; gap:28px; min-height:0; align-content:center; padding:18px 0; }
+    .worked.compact { min-height:0; padding:10px 0; }
+    .content:not(.center) > .worked { flex:1 1 auto; }
+    .formula-block { padding:28px 34px; background:#fffdf9; border:3px solid #d8d2c6; border-radius:22px; text-align:center; font:700 48px var(--font-body); }
+    .process { display:grid; grid-template-columns:repeat(5,1fr); gap:18px; margin:26px 0; }
+    .process > div { min-height:150px; padding:22px; display:grid; align-content:center; gap:10px; text-align:center; border:2px solid #d8d2c6; border-radius:20px; background:#fffdf9; }
+    .process b { font:800 28px var(--font-body); color:var(--blue); }
+    .process span { font:500 22px/1.4 var(--font-body); }
+    .calc-row { display:grid; grid-template-columns:1fr auto 1fr auto 1fr; align-items:center; gap:20px; }
+    .calc-row.four { grid-template-columns:repeat(4,1fr); }
+    .calc-step { min-height:160px; display:grid; place-items:center; align-content:center; gap:12px; padding:24px; border:3px solid #d8d2c6; border-radius:22px; background:#fffdf9; text-align:center; }
+    .calc-step b { font:800 26px var(--font-body); color:var(--blue); }
+    .calc-step span { font:700 33px/1.3 var(--font-body); }
+    .calc-step.key { background:var(--green-soft); border-color:var(--green); }
+    .operator { font:800 48px var(--font-body); color:var(--red); }
+    .metric-strip { display:grid; grid-template-columns:repeat(4,1fr); gap:15px; margin-top:24px; }
+    .metric-strip span { padding:18px; border:2px solid #d6d1c7; border-radius:16px; background:#fffdf9; text-align:center; font:700 21px var(--font-body); }
+    .scale-row { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:26px 0; }
+    .scale-row span { min-height:145px; display:grid; place-items:center; align-content:center; gap:10px; border:3px solid #d3cbbd; border-radius:20px; background:linear-gradient(135deg,#fffdf9,var(--green-soft)); font:800 44px var(--font-display); text-align:center; }
+    .scale-row small { font:600 20px var(--font-body); }
+    .symbol-cloud { margin-top:45px; font:700 45px/1.6 var(--font-body); color:#8aa4ba; letter-spacing:.16em; }
+    .symbol-cloud.key { color:var(--green); }
+    .centered-label { margin-top:18px; text-align:center; font:700 23px var(--font-body); }
+    .dot-row { margin:60px 0; text-align:center; font-size:45px; color:var(--green); }
+    .mini-dist { height:150px; margin-top:28px; border-bottom:4px solid var(--ink); background:radial-gradient(ellipse at center bottom,var(--pink) 0 18%,transparent 19%); }
+    .mini-dist.narrow { background-size:45% 100%; background-repeat:no-repeat; background-position:center bottom; }
+    .mini-dist.wide { background-size:95% 80%; background-repeat:no-repeat; background-position:center bottom; }
+    .marker { position:absolute; bottom:-16px; transform:translateX(-50%); padding:8px 12px; border-radius:10px; background:var(--red); color:white; font:700 21px var(--font-body); }
+    .number-line.labeled { margin-bottom:45px; }
+    .number-line .tick { position:absolute; bottom:-42px; transform:translateX(-50%); font:700 18px var(--font-body); }
+    .small-line { height:120px; margin:10px 4px 20px; }
+    .coverage-lines { display:grid; gap:14px; margin-top:30px; }
+    .coverage-lines i { position:relative; display:block; width:78%; height:8px; margin:auto; background:var(--blue); border-radius:10px; }
+    .coverage-lines i::after { content:""; position:absolute; left:55%; top:-7px; width:20px; height:20px; border-radius:50%; background:var(--red); }
+    .coverage-lines i.miss { margin-left:4%; }
+    .flow .chip { justify-content:center; margin-top:18px; }
+    .opening-table th, .opening-table td { padding:18px 14px; }
+    .content:not(.center) > .steps { flex:1 1 auto; align-items:center; }
+    .table-spotlight[data-mode="all"] td, .table-spotlight[data-mode="all"] th { opacity:1; }
+    .table-spotlight[data-mode="se"] td:not(:first-child) { color:transparent; opacity:1; }
+    .table-spotlight[data-mode="se"] td:first-child { opacity:.4; }
+    .table-spotlight[data-mode="se"] .se-cell { color:var(--red); background:#fff0b8; padding:4px 8px; border-radius:8px; }
+  
+  </style>
+</head>
+
+<body>
+  <div class="deck-viewport" aria-label="回归表阅读课件">
+    <main class="deck-stage" id="deckStage">
+
+      <section class="slide title-slide active" data-title="封面">
+        <div class="paper"><div class="title-meta"><span class="pill">Tutorial 03</span><span>Behavioural Economics</span></div>
+          <div class="title-block"><h1 class="reveal" data-editable>读懂回归表<span class="english">（Reading Regression Tables）</span></h1><p class="sub reveal">从 OLS 到 Tobit：零基础实证阅读课</p></div>
+          <div class="title-plot"><svg viewBox="0 0 500 475" aria-label="负向回归关系示意图"><line x1="55" y1="400" x2="455" y2="400" stroke="#666" stroke-width="4"/><line x1="55" y1="50" x2="55" y2="400" stroke="#666" stroke-width="4"/><path d="M85 100L425 350" class="fit-line"/><g fill="#397a68" stroke="white" stroke-width="4"><circle cx="100" cy="120" r="12"/><circle cx="165" cy="155" r="12"/><circle cx="235" cy="235" r="12"/><circle cx="300" cy="260" r="12"/><circle cx="390" cy="335" r="12"/></g><text x="255" y="455" text-anchor="middle" class="axis-label">社会距离（social distance）</text><text x="18" y="220" transform="rotate(-90 18 220)" text-anchor="middle" class="axis-label">环保态度</text></svg></div>
+          <div class="title-paper-info"><strong>Caferra, Morone &amp; Morone (2026)</strong><br><em>Ecological Economics</em> 244: 108976<br>TA: Ray · Renmin University of China · 2026.07.14</div>
+          <div class="title-tabs"><span style="background:var(--lavender)">OLS</span><span style="background:var(--pink)">推断</span><span style="background:var(--sky)">多元</span><span style="background:var(--cream)">Tobit</span></div>
+        </div>
+      </section>
+
+      <section class="slide" data-tab="导入" style="--tab-color:var(--mint)" data-title="课程内容">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">导入</div><h2 class="slide-title reveal" data-editable>课程内容</h2>
+          <div class="steps reveal"><div class="step"><b>1</b><h3>变量</h3><p>识别因变量、自变量和样本。</p></div><div class="step"><b>2</b><h3>OLS</h3><p>理解拟合值、残差与系数。</p></div><div class="step"><b>3</b><h3>不确定性</h3><p>阅读标准误、p 值和区间。</p></div><div class="step"><b>4</b><h3>多元回归</h3><p>解释控制变量和模型列。</p></div><div class="step"><b>5</b><h3>拟合</h3><p>理解 N、R² 和调整后 R²。</p></div><div class="step"><b>6</b><h3>模型选择</h3><p>区分 OLS、ordered models 与 Tobit。</p></div></div><div class="definition-band  reveal"><b>最终任务</b><span>使用固定顺序完整解释论文中的一行回归结果。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="导入" style="--tab-color:var(--mint)" data-title="回归表的初次观察">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">导入</div><h2 class="slide-title reveal" data-editable>回归表的初次观察</h2>
+          
+  <table class="reg-table opening-table reveal" aria-label="Table 3 教学重排"><thead><tr><th>变量</th><th>(1) Spatial</th><th>(3) Temporal</th><th>(4) Social</th><th>(9) Full</th></tr></thead><tbody>
+    <tr><td>Spatial distance</td><td>−0.041<br><span class="se">(0.057)</span></td><td>—</td><td>—</td><td>0.008<br><span class="se">(0.056)</span></td></tr>
+    <tr><td>Temporal distance</td><td>—</td><td>−0.178 <span class="sig">***</span><br><span class="se">(0.067)</span></td><td>—</td><td>−0.157 <span class="sig">**</span><br><span class="se">(0.065)</span></td></tr>
+    <tr class="target-row"><td>Social distance</td><td>—</td><td>—</td><td>−0.274 <span class="sig">***</span><br><span class="se">(0.052)</span></td><td>−0.230 <span class="sig">***</span><br><span class="se">(0.053)</span></td></tr>
+    <tr><td>Institutional trust</td><td>0.161 <span class="sig">**</span></td><td>0.147 <span class="sig">**</span></td><td>0.177 <span class="sig">***</span></td><td>0.163 <span class="sig">***</span><br><span class="se">(0.058)</span></td></tr>
+    <tr class="footer-row"><td>Controls / N / R²</td><td>Yes / 203 / .082</td><td>Yes / 203 / .120</td><td>Yes / 203 / .178</td><td>Yes / 203 / .217</td></tr>
+  </tbody></table><div class="metric-strip reveal"><span>指出一个系数</span><span>指出一个括号数值</span><span>指出一组星号</span><span>指出样本量</span></div>
+        </div><div class="source">来源：Caferra et al. (2026), Table 3；为课堂阅读重排。</div></div>
+      </section>
+
+      <section class="slide" data-tab="导入" style="--tab-color:var(--mint)" data-title="回归表的四个区域">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">导入</div><h2 class="slide-title reveal" data-editable>回归表的四个区域</h2>
+          <div class="grid-4 lesson-grid reveal"><div class="card blue"><h3>表头</h3><p>说明因变量、模型编号和每一列的设定。</p></div><div class="card green"><h3>变量行</h3><p>每一行对应一个解释变量或控制变量。</p></div><div class="card gold"><h3>系数与括号</h3><p>第一行通常是系数；括号内通常是标准误。</p></div><div class="card red"><h3>表尾</h3><p>报告样本量、R²、控制变量和标准误类型。</p></div></div><div class="definition-band  reveal"><b>阅读顺序</b><span>先确认因变量和模型列，再读系数与不确定性，最后检查表尾。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide section-break" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="OLS 的基本语言">
+        <div class="paper"><div class="content"><div class="section-index reveal">01</div><div><div class="eyebrow reveal">OLS 基础</div><h2 class="reveal" data-editable>OLS 的基本语言</h2><p class="reveal">从数据、变量和线性关系开始，逐步说明系数、预测值、残差和最小二乘。</p></div></div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="数据、观测值与变量">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>数据、观测值与变量</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>数据（data）</h3><p>研究中记录的全部信息。本文的数据来自 203 名受访者。</p></div><div class="card green"><h3>观测值（observation）</h3><p>数据表中的一行。本文每一行对应一名受访者。</p></div><div class="card gold"><h3>变量（variable）</h3><p>数据表中的一列，例如年龄、社会距离或环保态度。</p></div></div><div class="definition-band  reveal"><b>例子</b><span>受访者 17 的社会距离得分、年龄和环保态度共同构成一条观测。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="因变量与自变量">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>因变量与自变量</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card red"><div class="number">Y</div><h3>因变量（dependent variable）</h3><p>研究需要解释或预测的结果。本文示例使用总体环保态度的标准化合成得分。</p></div><div class="card blue"><div class="number">X</div><h3>自变量（independent variable）</h3><p>用于解释 Y 差异的变量。这里使用社会距离得分。</p></div></div><div class="definition-band  reveal"><b>研究问题</b><span>社会距离较高的受访者，其环保态度平均是否较低？</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="线性关系与条件平均值">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>线性关系与条件平均值</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="plot-card"><svg viewBox="0 0 720 470" class="plot-svg" aria-label="散点与条件平均线"><line x1="70" y1="410" x2="680" y2="410" stroke="#555" stroke-width="4"/><line x1="70" y1="35" x2="70" y2="410" stroke="#555" stroke-width="4"/><path d="M100 90L640 350" class="fit-line"/><g class="dot"><circle cx="130" cy="130" r="12"/><circle cx="170" cy="95" r="12"/><circle cx="250" cy="205" r="12"/><circle cx="340" cy="190" r="12"/><circle cx="420" cy="310" r="12"/><circle cx="560" cy="290" r="12"/><circle cx="620" cy="370" r="12"/></g></svg></div><div class="stack"><div class="card blue"><h3>线性关系（linear relationship）</h3><p>用一条直线概括 X 与 Y 的平均变化趋势。</p></div><div class="card green"><h3>条件平均值（conditional mean）</h3><p>给定某个 X 水平时，Y 的平均水平。回归线描述的就是这个平均值。</p></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="预测值、误差项与残差">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>预测值、误差项与残差</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>预测值（predicted value）</h3><p>Ŷᵢ 是回归线在第 i 个受访者 X 值处给出的平均预测。</p></div><div class="card gold"><h3>误差项（error term）</h3><p>εᵢ 表示总体模型中未被 X 解释的部分，研究者无法直接观察。</p></div><div class="card green"><h3>残差（residual）</h3><p>eᵢ = Yᵢ − Ŷᵢ，是样本中观测值与预测值的差。</p></div></div><div class="definition-band  reveal"><b>区别</b><span>误差项属于未知总体模型；残差由当前样本计算得到。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="残差平方和与拟合线">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>残差平方和与拟合线</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="plot-card"><svg viewBox="0 0 720 440" class="plot-svg"><line x1="65" y1="390" x2="680" y2="390" stroke="#555" stroke-width="4"/><line x1="65" y1="35" x2="65" y2="390" stroke="#555" stroke-width="4"/><g class="dot"><circle cx="130" cy="105" r="12"/><circle cx="220" cy="155" r="12"/><circle cx="315" cy="235" r="12"/><circle cx="425" cy="255" r="12"/><circle cx="570" cy="335" r="12"/></g><path id="candidateLine" d="M100 105L640 355" class="fit-line"/></svg></div><div class="stack"><div class="card red center"><div><div class="number" id="sseValue">1.00</div><h3>残差平方和（SSE，示意）</h3></div></div><div class="chips"><button class="action" data-fit="flat">候选线 A</button><button class="action alt" data-fit="steep">候选线 B</button><button class="action warn" data-fit="best">OLS 线</button></div><p class="lead">比较各条线的 Σeᵢ²。数值最小的线被选中。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="普通最小二乘法（OLS）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>普通最小二乘法（OLS）</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>普通（ordinary）</h3><p>最基础的线性回归估计方法。</p></div><div class="card green"><h3>最小（least）</h3><p>在所有候选系数中寻找目标函数的最小值。</p></div><div class="card gold"><h3>二乘（squares）</h3><p>目标函数是残差的平方和 Σeᵢ²。</p></div></div><div class="definition-band  reveal"><b>平方的作用</b><span>正负残差不会相互抵消；较大的残差会受到更高权重。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="简单线性回归方程">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>简单线性回归方程</h2>
+          <div class="worked reveal"><div class="formula-block">Yᵢ = α + βXᵢ + εᵢ</div><div class="process"><div><b>Yᵢ</b><span>第 i 人的结果</span></div><div><b>α</b><span>截距</span></div><div><b>β</b><span>斜率或系数</span></div><div><b>Xᵢ</b><span>第 i 人的解释变量</span></div><div><b>εᵢ</b><span>未解释部分</span></div></div></div><div class="definition-band  reveal"><b>拟合方程</b><span>估计完成后使用 Ŷᵢ = α̂ + β̂Xᵢ 计算样本内预测值。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="截距（intercept）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>截距（intercept）</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card red center"><div><div class="number">α̂</div><h3>X = 0 时的预测值</h3><p>截距确定回归线在纵轴上的起点。</p></div></div><div class="stack"><div class="card blue"><h3>有时具有实际意义</h3><p>若 X = 0 是可观察且合理的状态，截距可以解释为该状态下的平均 Y。</p></div><div class="card gold"><h3>有时只是计算起点</h3><p>若样本中没有 X = 0，截距仍参与拟合，但缺少直接的现实解释。</p></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="回归系数（coefficient）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>回归系数（coefficient）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>在简单线性回归中，X 增加 1 个单位时，Y 的条件平均值变化 β 个单位。</span></div><div class="grid-3 lesson-grid reveal"><div class="card red"><h3>方向</h3><p>β &gt; 0 表示同向变化；β &lt; 0 表示反向变化。</p></div><div class="card blue"><h3>大小</h3><p>|β| 表示 X 每增加 1 单位时，Y 平均变化多少。</p></div><div class="card green"><h3>单位</h3><p>系数单位由 X 和 Y 的计量单位共同决定。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="系数 −0.230 的完整解释">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>系数 −0.230 的完整解释</h2>
+          <div class="worked compact reveal"><div class="formula-block"><span class="beta">β̂ = −0.230</span></div><div class="calc-row"><div class="calc-step"><b>1</b><span>社会距离增加 1 个单位</span></div><div class="arrow">→</div><div class="calc-step"><b>2</b><span>环保态度平均降低</span></div><div class="arrow">→</div><div class="calc-step"><b>3</b><span>约 0.230 个标准差</span></div></div></div><div class="definition-band  reveal"><b>条件</b><span>该解释对应完整模型，并保持模型中的其他变量不变。</span></div><div class="definition-band warning reveal"><b>结论范围</b><span>这里描述样本中的条件关联；横截面观察性数据不足以识别因果效应。</span></div>
+        </div><div class="source">Caferra et al. (2026), Table 3, column (9).</div></div>
+      </section>
+
+      <section class="slide" data-tab="OLS 基础" style="--tab-color:var(--lavender)" data-title="标准化得分（standardized score）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">OLS 基础</div><h2 class="slide-title reveal" data-editable>标准化得分（standardized score）</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>计算</h3><div class="formula">z = (原始值 − 均值) ÷ 标准差</div><p style="margin-top:22px">标准化后，样本均值约为 0，标准差约为 1。</p></div><div class="card green"><h3>系数单位</h3><p>本文因变量采用多个题项的标准化均值。因而 −0.230 表示环保态度约下降 0.230 个标准差。</p><p class="muted" style="margin-top:18px">它不表示下降 23%，也不表示 Likert 原始分数下降 0.230 分。</p></div></div><div class="definition-band  reveal"><b>用途</b><span>标准化便于比较原始量纲不同的题项与量表。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide section-break" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="估计值的不确定性">
+        <div class="paper"><div class="content"><div class="section-index reveal">02</div><div><div class="eyebrow reveal">统计推断</div><h2 class="reveal" data-editable>估计值的不确定性</h2><p class="reveal">样本系数会随抽样变化。标准误、检验和置信区间用于描述这种变化。</p></div></div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="总体与样本">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>总体与样本</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>总体（population）</h3><p>研究结论希望适用的完整群体。总体中的关系通常无法被完整观察。</p><div class="symbol-cloud">○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○ ○</div></div><div class="card green"><h3>样本（sample）</h3><p>实际进入数据并参与估计的个体。本文样本为 203 名意大利 Prolific 受访者。</p><div class="symbol-cloud key">● ● ● ● ●</div></div></div><div class="definition-band  reveal"><b>外推限制</b><span>在线样本在性别、年龄和地区上做了平衡，但不能自动代表所有意大利居民。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="总体参数与样本估计值">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>总体参数与样本估计值</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>β：总体参数（parameter）</h3><p>总体中的固定关系。它通常未知，需要借助样本估计。</p></div><div class="card green"><h3>β̂：估计值（estimate）</h3><p>使用当前样本计算得到的数值。更换样本后可能变化。</p></div><div class="card gold"><h3>估计量（estimator）</h3><p>从样本数据计算 β̂ 的规则。OLS 就是一种估计规则。</p></div></div><div class="definition-band  reveal"><b>Table 3</b><span>−0.230 是当前样本给出的 β̂。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="抽样波动（sampling variation）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>抽样波动（sampling variation）</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="plot-card"><svg viewBox="0 0 720 440" class="plot-svg"><line x1="65" y1="390" x2="680" y2="390" stroke="#555" stroke-width="4"/><line x1="65" y1="35" x2="65" y2="390" stroke="#555" stroke-width="4"/><path d="M100 105L640 355" stroke="#999" stroke-width="5" fill="none"/><g id="sampleLines"></g></svg></div><div class="stack"><div class="card red"><h3>当前抽样次数</h3><div class="number" id="drawCount">0</div><button class="action" id="drawSampleBtn">抽取一个新样本</button></div><div class="card blue"><h3>最近的 β̂</h3><p id="recentBetas">尚未抽样</p></div><p class="lead">总体关系保持不变，进入样本的人发生变化，估计斜率也会变化。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="抽样分布（sampling distribution）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>抽样分布（sampling distribution）</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><div class="dist"><span class="bar" style="height:40px"></span><span class="bar" style="height:90px"></span><span class="bar" style="height:180px"></span><span class="bar" style="height:250px"></span><span class="bar" style="height:175px"></span><span class="bar" style="height:85px"></span><span class="bar" style="height:35px"></span></div><p class="centered-label">许多次重复抽样得到的 β̂</p></div><div class="stack"><div class="card green"><h3>中心位置</h3><p>表示估计值通常落在哪个范围。</p></div><div class="card gold"><h3>分布宽度</h3><p>表示估计值在不同样本之间变化多大。</p></div></div></div><div class="definition-band  reveal"><b>用途</b><span>标准误就是抽样分布宽度的量化指标。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="标准差（standard deviation）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>标准差（standard deviation）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>标准差描述一组观测值围绕其均值的典型距离。</span></div><div class="grid-2 lesson-grid medium-grid reveal"><div class="card green"><h3>标准差较小</h3><div class="dot-row tight">● ● ● ● ●</div><p>受访者得分集中在均值附近。</p></div><div class="card red"><h3>标准差较大</h3><div class="dot-row wide">●　 ●　　 ●　　●　　 ●</div><p>受访者得分分布得更分散。</p></div></div><div class="definition-band  reveal"><b>对象</b><span>标准差描述个人观测值，例如 203 人的环保态度差异。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="标准误（standard error）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>标准误（standard error）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>标准误是估计量抽样分布的标准差，用于描述估计值在重复样本中的波动程度。</span></div><div class="grid-2 lesson-grid medium-grid reveal"><div class="card blue"><h3>SE 较小</h3><p>不同样本得到的 β̂ 较集中，点估计较精确。</p><div class="mini-dist narrow"></div></div><div class="card red"><h3>SE 较大</h3><p>不同样本得到的 β̂ 较分散，点估计较不精确。</p><div class="mini-dist wide"></div></div></div><div class="definition-band  reveal"><b>回归表</b><span>系数下面的括号通常报告标准误。Table 3 使用异方差稳健标准误。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="标准差与标准误的区别">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>标准差与标准误的区别</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>标准差（SD）</h3><p>描述个人数据的分散程度。对象是 Yᵢ、Xᵢ 等观测值。</p></div><div class="card green"><h3>标准误（SE）</h3><p>描述系数估计的抽样波动。对象是 β̂ 等估计值。</p></div><div class="card gold"><h3>共同点</h3><p>二者都衡量分散程度，但研究对象和用途不同。</p></div></div><div class="definition-band  reveal"><b>例子</b><span>受访者态度差异较大，并不必然意味着社会距离系数的标准误也很大。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="影响标准误的因素">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>影响标准误的因素</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><div class="dist" id="precisionBars"><span class="bar" style="height:35px"></span><span class="bar" style="height:95px"></span><span class="bar" style="height:190px"></span><span class="bar" style="height:240px"></span><span class="bar" style="height:190px"></span><span class="bar" style="height:95px"></span><span class="bar" style="height:35px"></span></div><p id="precisionLabel" class="centered-label">基准抽样分布</p></div><div class="stack"><div class="chips"><button class="action precision-btn" data-state="largeN">增大样本量</button><button class="action alt precision-btn" data-state="lessNoise">降低结果噪声</button><button class="action warn precision-btn" data-state="moreX">扩大 X 范围</button></div><div class="card gold"><h3>结果解释</h3><p id="precisionFeedback">选择一种情形，观察抽样分布宽度。</p></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="零假设与备择假设">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>零假设与备择假设</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><div class="number">H₀</div><h3>零假设（null hypothesis）</h3><p>β = 0。总体中不存在社会距离与环保态度的线性关联。</p></div><div class="card green"><div class="number">H₁</div><h3>备择假设（alternative hypothesis）</h3><p>β ≠ 0。总体中存在正向或负向的线性关联。</p></div></div><div class="definition-band  reveal"><b>检验逻辑</b><span>先在 H₀ 成立的条件下建立参考分布，再判断当前样本结果是否异常。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="t 统计量（t statistic）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>t 统计量（t statistic）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>t 值表示估计系数距离零假设值有多少个标准误。</span></div><div class="worked reveal"><div class="formula-block">t = (β̂ − 0) ÷ SE(β̂)</div><div class="grid-2"><div class="card green"><h3>|t| 较大</h3><p>系数相对标准误较大，与 H₀ 的距离较远。</p></div><div class="card gold"><h3>|t| 较小</h3><p>系数相对标准误较小，样本证据较弱。</p></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="t 值的数值计算">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>t 值的数值计算</h2>
+          <div class="worked reveal"><div class="calc-row"><div class="calc-step"><b>β̂</b><span>−0.230</span></div><div class="operator">÷</div><div class="calc-step"><b>SE</b><span>0.053</span></div><div class="operator">=</div><div class="calc-step key"><b>t</b><span>−4.34</span></div></div><div class="number-line"><div class="zero"></div><div class="marker" style="left:7%">−4.34</div></div></div><div class="definition-band  reveal"><b>解释</b><span>估计值位于零假设值左侧约 4.34 个标准误。</span></div>
+        </div><div class="source">数值来自 Table 3 完整模型的 Social distance。</div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="p 值（p-value）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>p 值（p-value）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>在 H₀ 和模型假设成立时，获得当前统计量或更极端统计量的概率。</span></div><div class="grid-3 medium-grid lesson-grid reveal"><div class="card blue"><h3>条件</h3><p>p 值的计算以 H₀ 成立为前提。</p></div><div class="card green"><h3>对象</h3><p>衡量当前或更极端的 t 值。</p></div><div class="card gold"><h3>含义</h3><p>p 较小表示当前数据与 H₀ 的相容程度较低。</p></div></div><div class="definition-band warning reveal"><b>错误解释</b><span>p 值不表示 H₀ 为真的概率，也不表示研究结果由偶然因素产生的概率。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="p 值对应参考分布的尾部面积">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>p 值对应参考分布的尾部面积</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><svg viewBox="0 0 760 380" class="plot-svg"><path d="M50 330 C150 330 180 260 250 160 C310 75 450 75 510 160 C580 260 610 330 710 330" fill="none" stroke="#214e73" stroke-width="7"/><path d="M50 330 C110 330 145 310 190 270 L190 330 Z" fill="#f4b8c5"/><path d="M570 270 C615 310 650 330 710 330 L570 330 Z" fill="#f4b8c5"/><line x1="380" y1="80" x2="380" y2="330" stroke="#777" stroke-dasharray="10 8" stroke-width="4"/><text x="380" y="360" text-anchor="middle" class="axis-label">H₀ 下的 t = 0</text></svg></div><div class="stack"><div class="card red"><h3>双侧检验</h3><p>正向和负向的极端结果都计入 p 值，因此计算两侧尾部面积。</p></div><div class="card green"><h3>Table 3</h3><p>|t| = 4.34 位于尾部很远的位置，对应 p &lt; 0.01。</p></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="显著性水平与第一类错误">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>显著性水平与第一类错误</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>显著性水平（α）</h3><p>研究者在检验前设定的判断阈值。常用 α = 0.10、0.05 或 0.01。</p><div class="formula">p &lt; α → 拒绝 H₀</div></div><div class="card red"><h3>第一类错误（Type I error）</h3><p>总体中 H₀ 实际成立，但样本检验拒绝了 H₀。α 控制这种长期错误率。</p><p class="muted" style="margin-top:18px">一次显著结果仍可能出错，因此需要研究设计、重复研究和稳健性检查。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="显著性星号（significance stars）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>显著性星号（significance stars）</h2>
+          <div class="grid-4 lesson-grid reveal"><div class="card"><h3>无星</h3><div class="number">p ≥ .10</div></div><div class="card green"><h3>*</h3><div class="number">p &lt; .10</div></div><div class="card blue"><h3>**</h3><div class="number">p &lt; .05</div></div><div class="card red"><h3>***</h3><div class="number">p &lt; .01</div></div></div><div class="definition-band  reveal"><b>连续性</b><span>p = 0.049 与 p = 0.051 的证据强度很接近，星号类别却会不同。应同时报告系数和不确定性。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="置信区间（confidence interval）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>置信区间（confidence interval）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>由样本估计值和标准误构造的一段范围，用于表示与当前数据及模型假设较相容的参数值。</span></div><div class="worked compact reveal"><div class="formula-block">估计值 ± 临界值 × 标准误</div><div class="number-line"><div class="zero"></div><div class="ci" style="left:18%;width:38%"><span class="point"></span></div></div></div><div class="definition-band  reveal"><b>宽度</b><span>标准误越大或置信水平越高，区间通常越宽。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="95% 置信区间的数值计算">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>95% 置信区间的数值计算</h2>
+          <div class="worked reveal"><div class="calc-row four"><div class="calc-step"><b>点估计</b><span>−0.230</span></div><div class="calc-step"><b>误差范围</b><span>1.96 × 0.053 = 0.104</span></div><div class="calc-step"><b>下界</b><span>−0.334</span></div><div class="calc-step key"><b>上界</b><span>−0.126</span></div></div><div class="number-line labeled"><div class="zero"></div><div class="ci" style="left:13%;width:31%"><span class="point"></span></div><span class="tick" style="left:13%">−0.334</span><span class="tick" style="left:28%">−0.230</span><span class="tick" style="left:44%">−0.126</span><span class="tick" style="left:50%">0</span></div></div><div class="definition-band  reveal"><b>结论</b><span>区间完全位于 0 左侧，与负向关联相容，并排除 0。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="95% 覆盖率的含义">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>95% 覆盖率的含义</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>重复抽样程序</h3><p>若反复抽样，并对每个样本使用同一方法构造区间，长期约 95% 的区间会覆盖固定的总体参数。</p><div class="coverage-lines"><i></i><i></i><i class="miss"></i><i></i><i></i></div></div><div class="card gold"><h3>当前区间</h3><p>区间一旦由当前样本计算出来，就已经固定。频率学派不把它解释为“β 有 95% 概率位于该区间”。</p></div></div><div class="definition-band  reveal"><b>课堂读法</b><span>该区间给出与当前数据和模型假设较相容的一组效应值。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="置信区间、p 值与显著性的联系">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>置信区间、p 值与显著性的联系</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card green"><h3>A</h3><div class="number-line small-line"><div class="zero"></div><div class="ci" style="left:8%;width:34%"><span class="point"></span></div></div><p>区间不包含 0</p><button class="action quiz-option" data-correct="true">选择 A</button></div><div class="card blue"><h3>B</h3><div class="number-line small-line"><div class="zero"></div><div class="ci" style="left:27%;width:48%"><span class="point"></span></div></div><p>区间包含 0</p><button class="action quiz-option" data-correct="false">选择 B</button></div><div class="card gold"><h3>判断规则</h3><p>在相同双侧检验与置信水平下，95% 区间不包含 0 对应 p &lt; 0.05。</p><div class="answer fragment"><div class="feedback">A 对应 5% 水平显著。</div></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="统计推断" style="--tab-color:var(--pink)" data-title="统计显著性与实际意义">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">统计推断</div><h2 class="slide-title reveal" data-editable>统计显著性与实际意义</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>极小效应，估计很精确</h3><p>β̂ = 0.002，SE = 0.0005。p 值可能很小，但实际变化有限。</p></div><div class="card red"><h3>较大效应，估计不精确</h3><p>β̂ = 0.40，SE = 0.28。p 值可能较大，但仍需更多数据判断效应大小。</p></div></div><div class="metric-strip reveal"><span>系数：多大</span><span>标准误：多精确</span><span>p 值：H₀ 下多极端</span><span>区间：相容范围</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide section-break" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="从一个 X 到多个 X">
+        <div class="paper"><div class="content"><div class="section-index reveal">03</div><div><div class="eyebrow reveal">多元回归</div><h2 class="reveal" data-editable>从一个 X 到多个 X</h2><p class="reveal">多元回归同时纳入多个解释变量，用条件比较描述各变量与结果之间的关系。</p></div></div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="遗漏变量（omitted variable）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>遗漏变量（omitted variable）</h2>
+          <div class="flow reveal"><div class="flow-node"><h3>教育程度 Z</h3><p>可能影响气候信息获取</p></div><div class="arrow">→</div><div class="flow-node"><h3>社会距离 X</h3><p>气候影响被感知得更远</p></div><div class="arrow">→</div><div class="flow-node"><h3>环保态度 Y</h3><p>标准化合成得分</p></div></div><div class="definition-band  reveal"><b>问题</b><span>若教育程度同时关联 X 与 Y，但模型没有纳入教育，X 的系数可能混入教育差异。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="控制变量（control variable）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>控制变量（control variable）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>控制变量是与研究问题相关、被同时纳入回归模型的其他观测变量。</span></div><div class="grid-2 lesson-grid medium-grid reveal"><div class="card blue"><h3>本文的控制变量</h3><div class="chips"><span class="chip">性别</span><span class="chip">年龄</span><span class="chip">教育</span><span class="chip">收入</span><span class="chip">家庭规模</span></div></div><div class="card green"><h3>系数的变化</h3><p>加入控制变量后，β 描述在这些已观测变量保持不变时，X 与 Y 的条件关联。</p></div></div><div class="definition-band  reveal"><b>限制</b><span>未测量或未纳入模型的因素仍可能造成偏误。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="条件比较的直觉">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>条件比较的直觉</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card green"><h3>受访者 A</h3><p>35 岁、本科、收入组 3、社会距离较低。</p><div class="number">X = 2</div></div><div class="card blue"><h3>受访者 B</h3><p>年龄、教育和收入相近，社会距离较高。</p><div class="number">X = 4</div></div></div><div class="definition-band  reveal"><b>比较</b><span>多元回归利用全部样本，在模型中近似比较其他已观测特征相近、X 不同的受访者。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="多元回归方程">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>多元回归方程</h2>
+          <div class="worked reveal"><div class="formula-block">Yᵢ = α + β₁X₁ᵢ + β₂X₂ᵢ + … + γCᵢ + εᵢ</div><div class="process"><div><b>β₁</b><span>社会距离系数</span></div><div><b>β₂</b><span>制度信任系数</span></div><div><b>γ</b><span>控制变量系数</span></div><div><b>Cᵢ</b><span>控制变量集合</span></div></div></div><div class="definition-band  reveal"><b>系数解释</b><span>每个系数都以方程中其余变量保持不变为条件。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="回归表的每一列对应一个模型">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>回归表的每一列对应一个模型</h2>
+          <table class="reg-table reveal"><thead><tr><th>变量</th><th>(1) 简化模型</th><th>(4) Social</th><th>(9) 完整模型</th></tr></thead><tbody><tr><td>Social distance</td><td>—</td><td>−0.274 <span class="sig">***</span><br><span class="se">(0.052)</span></td><td>−0.230 <span class="sig">***</span><br><span class="se">(0.053)</span></td></tr><tr><td>Institutional trust</td><td>0.161 <span class="sig">**</span></td><td>0.177 <span class="sig">***</span></td><td>0.163 <span class="sig">***</span></td></tr><tr><td>主要解释变量</td><td>部分</td><td>部分</td><td>全部</td></tr><tr><td>Controls</td><td>Yes</td><td>Yes</td><td>Yes</td></tr></tbody></table><div class="definition-band  reveal"><b>列号</b><span>列号用于标识模型设定，不表示时间顺序。</span></div>
+        </div><div class="source">Caferra et al. (2026), Table 3；教学重排。</div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="加入变量后系数发生变化">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>加入变量后系数发生变化</h2>
+          <div class="worked compact reveal"><div class="calc-row"><div class="calc-step"><b>较简单模型</b><span>−0.274</span></div><div class="arrow">→</div><div class="calc-step"><b>加入更多变量</b><span>模型设定改变</span></div><div class="arrow">→</div><div class="calc-step key"><b>完整模型</b><span>−0.230</span></div></div></div><div class="grid-3 compact-grid lesson-grid reveal"><div class="card green"><h3>方向保持</h3><p>两个估计均为负值。</p></div><div class="card blue"><h3>大小变化</h3><p>绝对值减少约 0.044。</p></div><div class="card gold"><h3>谨慎解释</h3><p>新增变量与社会距离可能包含重叠信息。系数变化本身不能证明中介机制。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="R²（决定系数）的定义">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>R²（决定系数）的定义</h2>
+          <div class="definition-band reveal"><b>定义</b><span>R² 表示模型在当前样本中解释的 Y 总变异比例。</span></div><div class="worked reveal"><div class="formula-block">R² = 1 − 未解释变异 ÷ 总变异</div><div class="grid-3"><div class="card blue"><h3>总变异（SST）</h3><p>Y 与样本均值之间的平方差总和。</p></div><div class="card red"><h3>未解释变异（SSE）</h3><p>Y 与回归预测值之间的残差平方和。</p></div><div class="card green"><h3>已解释变异</h3><p>SST − SSE。</p></div></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="R² = 0.217 与调整后 R²">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>R² = 0.217 与调整后 R²</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><div class="number">0.217</div><h3>样本内拟合程度</h3><p>完整模型解释了当前样本中总体环保态度约 21.7% 的变异。</p><p class="muted">它不表示模型解释了 21.7% 的受访者，也不证明因果关系。</p></div><div class="card green"><h3>调整后 R²（adjusted R²）</h3><p>加入变量通常不会降低普通 R²。调整后 R² 对变量数量施加惩罚，更适合比较复杂度不同的模型。</p><p class="muted">预测目标和解释目标对 R² 的要求也可能不同。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="OLS 的基本假设与关注点">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>OLS 的基本假设与关注点</h2>
+          <div class="grid-4 lesson-grid reveal"><div class="card blue"><h3>线性设定</h3><p>条件平均关系能被所设方程合理描述。</p></div><div class="card green"><h3>独立抽样</h3><p>一名受访者的误差不系统决定另一人的误差。</p></div><div class="card gold"><h3>无完全共线</h3><p>解释变量不能由其他变量完全复制。</p></div><div class="card red"><h3>条件均值为零</h3><p>误差项不能与解释变量系统相关；该条件关系到无偏与因果解释。</p></div></div><div class="definition-band  reveal"><b>标准误</b><span>同方差影响传统标准误公式；异方差稳健标准误可放宽这一要求。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="异方差稳健标准误">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>异方差稳健标准误</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card green"><h3>可以修正</h3><p>当不同受访者的误差波动大小不同，稳健标准误改进 SE、t 值和 p 值的计算。</p><svg viewBox="0 0 620 220" class="plot-svg"><circle cx="80" cy="110" r="10" class="dot"/><circle cx="160" cy="100" r="10" class="dot"/><circle cx="250" cy="70" r="10" class="dot"/><circle cx="250" cy="150" r="10" class="dot"/><circle cx="390" cy="35" r="10" class="dot"/><circle cx="390" cy="190" r="10" class="dot"/><circle cx="520" cy="20" r="10" class="dot"/><circle cx="520" cy="205" r="10" class="dot"/></svg></div><div class="card red"><h3>无法修正</h3><ul class="clean"><li>遗漏变量</li><li>反向因果</li><li>测量误差</li><li>样本选择偏误</li></ul></div></div><div class="definition-band  reveal"><b>Table 3</b><span>括号内报告 robust standard errors。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="多元回归" style="--tab-color:var(--sky)" data-title="观察性回归的解释边界">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">多元回归</div><h2 class="slide-title reveal" data-editable>观察性回归的解释边界</h2>
+          <div class="grid-3 lesson-grid medium-grid reveal"><div class="card red"><h3>反向因果</h3><p>环保态度较强的人可能主动获取气候信息，因而感知距离较近。</p></div><div class="card gold"><h3>遗漏变量</h3><p>开放性人格可能同时影响心理距离和环保态度。</p></div><div class="card blue"><h3>样本选择</h3><p>Prolific 在线样本与总体居民可能存在系统差异。</p></div></div><div class="definition-band  reveal"><b>适当表述</b><span>社会距离与总体环保态度存在负向条件关联。</span></div><div class="definition-band warning reveal"><b>超出证据</b><span>“社会距离导致环保态度下降”需要更强的研究设计支持。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide section-break" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="从问卷得分到模型选择">
+        <div class="paper"><div class="content"><div class="section-index reveal">04</div><div><div class="eyebrow reveal">测量与模型</div><h2 class="reveal" data-editable>从问卷得分到模型选择</h2><p class="reveal">先确定因变量的测量方式，再讨论 OLS、ordered models 与 Tobit。</p></div></div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="Likert 题项（Likert item）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>Likert 题项（Likert item）</h2>
+          <div class="definition-band reveal"><b>定义</b><span>Likert 题项要求受访者在有顺序的回答类别中选择一个等级。</span></div><div class="scale-row reveal"><span>1<br><small>非常不同意</small></span><span>2<br><small>不同意</small></span><span>3<br><small>中立</small></span><span>4<br><small>同意</small></span><span>5<br><small>非常同意</small></span></div><div class="grid-3 compact-grid lesson-grid reveal"><div class="card green"><h3>有顺序</h3><p>5 表示比 4 更同意。</p></div><div class="card gold"><h3>间距未知</h3><p>1 到 2 的心理距离未必等于 4 到 5。</p></div><div class="card blue"><h3>模型选择</h3><p>单个题项常使用 ordered logit 或 ordered probit。</p></div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="多题项合成量表（composite scale）">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>多题项合成量表（composite scale）</h2>
+          <div class="process reveal"><div><b>A1–A6</b><span>六个环保态度题项</span></div><div><b>检查方向</b><span>确保高分含义一致</span></div><div><b>标准化</b><span>消除原始量纲差异</span></div><div><b>取均值</b><span>形成 general attitudes</span></div></div><div class="grid-2 lesson-grid compact reveal"><div class="card green"><h3>取值更细</h3><p>多个题项平均后，可得到多于五个取值，分布可能接近连续。</p></div><div class="card blue"><h3>内部一致性</h3><p>本文三个量表的 Cronbach's α 均不低于 0.81，说明题项之间具有较好一致性。</p></div></div>
+        </div><div class="source">量表构造依据 tutorial_02.tex 对 Caferra et al. (2026) 的整理。</div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="反向计分与标准化">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>反向计分与标准化</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card red"><h3>反向计分（reverse coding）</h3><p>Social distance 题项原句表示“影响我、家人与朋友”。同意程度越高意味着距离越近，因此编码方向需要反转。</p><div class="formula">反向分数 = 6 − 原分数</div></div><div class="card blue"><h3>标准化均值</h3><p>将题项转成共同尺度后再取平均。最终量表的 0 附近表示样本平均水平，正负值表示相对高低。</p><div class="formula">Scale = mean(z₁,…,zₖ)</div></div></div><div class="definition-band  reveal"><b>读系数前</b><span>先确认每个变量的高分代表什么。编码方向决定系数符号的语言解释。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="三类结果变量">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>三类结果变量</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>单个有序题项</h3><p>只有 1–5 五个有序类别。</p><p class="muted">常考虑 ordered logit/probit。</p></div><div class="card green"><h3>多题项合成得分</h3><p>取值较多，分布近似连续。</p><p class="muted">OLS 可作为基准模型。</p></div><div class="card red"><h3>被删失的连续结果</h3><p>潜在值可越过阈值，观察值被记录在端点。</p><p class="muted">存在删失机制时考虑 Tobit。</p></div></div><div class="definition-band  reveal"><b>判断依据</b><span>模型应与数据生成和记录过程相匹配。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="OLS、ordered models 与 Tobit">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>OLS、ordered models 与 Tobit</h2>
+          <div class="flow reveal"><div class="flow-node"><h3>单个 Likert 题项</h3><p>有序类别</p><div class="chip key">Ordered logit/probit</div></div><div class="arrow">→</div><div class="flow-node"><h3>合成量表</h3><p>近似连续</p><div class="chip key">OLS baseline</div></div><div class="arrow">→</div><div class="flow-node"><h3>阈值删失</h3><p>潜在连续结果</p><div class="chip key">Tobit</div></div></div><div class="definition-band  reveal"><b>稳健性（robustness）</b><span>更换有理论依据的模型后，核心方向、大小和推断是否保持。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="有界、删失与截断">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>有界、删失与截断</h2>
+          <div class="grid-3 lesson-grid reveal"><div class="card blue"><h3>有界（bounded）</h3><p>测量工具规定最小值和最大值，例如 1–5 题项。潜在值未必存在界外部分。</p></div><div class="card green"><h3>删失（censored）</h3><p>界外个体仍在数据中，但观察值被记录为阈值，例如收入超过上限统一记为上限。</p></div><div class="card red"><h3>截断（truncated）</h3><p>界外个体不进入样本，研究者看不到其观测记录。</p></div></div><div class="definition-band  reveal"><b>模型含义</b><span>变量有上下界只说明 bounded；Tobit 需要潜在连续变量和 censoring 机制。</span></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="测量与模型" style="--tab-color:var(--cream)" data-title="Tobit 模型及本文的稳健性分析">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">测量与模型</div><h2 class="slide-title reveal" data-editable>Tobit 模型及本文的稳健性分析</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>潜在结果 Y*</h3><div class="formula">Y* = Xβ + ε</div><p style="margin-top:18px">当 Y* 位于上下限之间时观察其数值；越过阈值时观察值被记录为端点。</p><p class="muted">Tobit 系数首先描述 X 对潜在 Y* 的关系，观测 Y 的边际效应需要另行计算。</p></div><div class="card gold"><h3>本文的使用方式</h3><p>论文依据合成量表的端点集中（corner solutions）报告 Tobit，并比较 OLS 与 Tobit 的方向和显著性。</p><p class="muted">解释时仍需评估潜在连续性、删失机制、正态性与同方差假设是否合理。</p></div></div><div class="definition-band  reveal"><b>结论</b><span>Tobit 为本文提供模型替代检验；它不构成所有有界合成量表的通用选择。</span></div>
+        </div><div class="source">Caferra et al. (2026), Appendix A；结合测量过程作方法评议。</div></div>
+      </section>
+
+      <section class="slide" data-tab="实战" style="--tab-color:var(--mint)" data-title="完整模型：系数与标准误">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实战</div><h2 class="slide-title reveal" data-editable>完整模型：系数与标准误</h2>
+          <div class="chips reveal" style="margin-bottom:18px"><button class="action table-mode" data-mode="row">突出核心系数</button><button class="action alt table-mode" data-mode="se">突出标准误</button><button class="action warn table-mode" data-mode="all">显示全部</button></div><table class="reg-table table-spotlight reveal" id="spotlightTable" data-mode="all"><thead><tr><th>Dependent variable: General attitudes</th><th>(9) Full model</th><th>课堂解释</th></tr></thead><tbody><tr><td>Spatial distance</td><td>0.008 <span class="se se-cell">(0.056)</span></td><td>区间会包含 0</td></tr><tr><td>Temporal distance</td><td>−0.157 <span class="sig">**</span> <span class="se se-cell">(0.065)</span></td><td>负向，5% 水平显著</td></tr><tr class="target-row"><td>Social distance</td><td>−0.230 <span class="sig">***</span> <span class="se se-cell">(0.053)</span></td><td>负向，估计较精确</td></tr><tr><td>Institutional trust</td><td>0.163 <span class="sig">***</span> <span class="se se-cell">(0.058)</span></td><td>正向，1% 水平显著</td></tr><tr><td>Social trust</td><td>0.074 <span class="se se-cell">(0.065)</span></td><td>区间会包含 0</td></tr></tbody></table><div class="definition-band  reveal"><b>系数单位</b><span>因变量采用标准化合成得分，系数按因变量标准差解释。</span></div>
+        </div><div class="source">Caferra et al. (2026), Table 3, column (9). Robust SE in parentheses.</div></div>
+      </section>
+
+      <section class="slide" data-tab="实战" style="--tab-color:var(--mint)" data-title="完整模型：表尾与结果差异">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实战</div><h2 class="slide-title reveal" data-editable>完整模型：表尾与结果差异</h2>
+          <div class="grid-2 lesson-grid reveal"><div class="card blue"><h3>Table 3 表尾</h3><table class="reg-table"><tbody><tr><td>Controls</td><td>Yes</td></tr><tr><td>Observations</td><td>203</td></tr><tr><td>R²</td><td>0.217</td></tr><tr><td>SE type</td><td>Robust</td></tr></tbody></table></div><div class="card green"><h3>不同环保结果</h3><table class="reg-table dense-table"><thead><tr><th>变量</th><th>Attitudes</th><th>Habitual</th><th>Occasional</th></tr></thead><tbody><tr><td>Temporal distance</td><td>−0.157**</td><td>不显著</td><td>−0.116**</td></tr><tr><td>Social distance</td><td>−0.230***</td><td>不显著</td><td>不显著</td></tr><tr><td>Experience</td><td>不显著</td><td>+0.071**</td><td>不显著</td></tr></tbody></table></div></div><div class="definition-band  reveal"><b>含义</b><span>解释变量与不同类型环保结果的关联并不相同。</span></div>
+        </div><div class="source">根据 Caferra et al. (2026), Tables 3–5 的完整模型整理。</div></div>
+      </section>
+
+      <section class="slide" data-tab="实战" style="--tab-color:var(--mint)" data-title="结课实战：完整解释一行结果">
+        <div class="paper"><div class="content">
+          <div class="eyebrow reveal">实战</div><h2 class="slide-title reveal" data-editable>结课实战：完整解释一行结果</h2>
+          <table class="reg-table reveal"><thead><tr><th>Dependent variable: General attitudes</th><th>(9) Full model</th></tr></thead><tbody><tr><td>Social distance</td><td>−0.230 <span class="sig">***</span><br><span class="se">(0.053)</span></td></tr><tr><td>Controls / N / R²</td><td>Yes / 203 / 0.217</td></tr></tbody></table><div class="grid-3 reveal" style="margin-top:28px"><div class="card blue"><h3>系数</h3><p>方向、大小和单位分别是什么？</p></div><div class="card green"><h3>不确定性</h3><p>SE、t 值、p 值和区间如何联系？</p></div><div class="card gold"><h3>结论范围</h3><p>可以报告关联到哪一层？</p></div></div><div class="chips reveal" style="margin-top:20px"><button class="action" id="capstoneReveal">显示参考解释</button></div><div class="answer fragment"><div class="feedback">控制模型列出的其他变量后，社会距离每增加 1 单位，总体环保态度平均降低约 0.230 个标准差。稳健标准误为 0.053，t ≈ −4.34，p &lt; 0.01，95% 置信区间约为 [−0.334, −0.126]。样本量为 203，R² = 0.217。该结果应解释为横截面条件关联。</div></div>
+        </div></div>
+      </section>
+
+      <section class="slide" data-tab="完成" style="--tab-color:var(--mint)" data-title="回归表阅读顺序">
+        <div class="paper"><div class="content center"><div><div class="eyebrow reveal">完成</div><h2 class="big-idea reveal" data-editable>回归表阅读顺序</h2><div class="steps reveal"><div class="step"><b>1</b><h3>研究问题</h3><p>Y、X、样本</p></div><div class="step"><b>2</b><h3>系数</h3><p>方向、大小、单位</p></div><div class="step"><b>3</b><h3>不确定性</h3><p>SE、p、CI</p></div><div class="step"><b>4</b><h3>模型列</h3><p>变量与设定</p></div><div class="step"><b>5</b><h3>整体信息</h3><p>N、R²、SE 类型</p></div><div class="step"><b>6</b><h3>解释边界</h3><p>关联、因果、测量过程</p></div></div></div></div></div>
+      </section>
+
+      <section class="slide" data-tab="完成" style="--tab-color:var(--mint)" data-title="课程结束">
+        <div class="paper"><div class="content center"><div><div class="eyebrow reveal">课程结束</div><h2 class="big-idea reveal" data-editable>先确定测量方式，<br>再选择模型并解释结果</h2><div class="accent-rule reveal" style="margin:32px auto"></div><div class="chips reveal" style="justify-content:center"><span class="chip">OLS（基准模型）</span><span class="chip">Ordered models（有序模型）</span><span class="chip">Tobit（删失模型）</span><span class="chip key">条件关联</span></div></div></div><div class="source">Caferra, Morone &amp; Morone (2026), <em>Ecological Economics</em> 244: 108976.</div></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- === EXTERNAL CONTROLS AND OVERVIEW === -->
+  <div class="deck-controls" aria-label="课件导航">
+    <button id="prevBtn" aria-label="上一页">←</button><div class="progress-track"><div class="progress-fill" id="progressFill"></div></div><span class="page-counter" id="pageCounter">1 / 1</span><button id="nextBtn" aria-label="下一页">→</button>
+  </div>
+  <div class="edit-hotzone" aria-label="显示编辑按钮"></div><button class="edit-toggle" id="editToggle" title="编辑模式（E）">✎</button>
+  <aside class="overview" id="overview"><h2>课件概览 · 按 O 返回</h2><div class="overview-grid" id="overviewGrid"></div></aside>
+
+  <script>
+    /* === SLIDE CONTROLLER: fixed-stage scaling and navigation === */
+    class SlidePresentation {
+      constructor() {
+        this.slides = [...document.querySelectorAll('.slide')];
+        this.stage = document.getElementById('deckStage');
+        this.currentSlide = 0;
+        this.touchStartX = 0;
+        this.wheelLocked = false;
+        this.injectFooters();
+        this.buildOverview();
+        this.setupStageScale();
+        this.setupNavigation();
+        this.showSlide(this.indexFromHash());
+      }
+
+      injectFooters() {
+        this.slides.forEach((slide, index) => {
+          if (slide.classList.contains('title-slide')) return;
+          const paper = slide.querySelector('.paper');
+          if (!paper) return;
+          const footer = document.createElement('div');
+          footer.className = 'auto-footer';
+          footer.textContent = `${index + 1} / ${this.slides.length}`;
+          paper.appendChild(footer);
+        });
+      }
+
+      setupStageScale() {
+        const scale = () => {
+          const factor = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+          const x = (window.innerWidth - 1920 * factor) / 2;
+          const y = (window.innerHeight - 1080 * factor) / 2;
+          this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+        };
+        scale();
+        window.addEventListener('resize', scale);
+      }
+
+      indexFromHash() {
+        const n = Number(location.hash.replace('#',''));
+        return Number.isFinite(n) && n >= 1 ? n - 1 : 0;
+      }
+
+      hiddenFragments() {
+        return [...this.slides[this.currentSlide].querySelectorAll('.fragment:not(.shown)')];
+      }
+
+      next() {
+        const hidden = this.hiddenFragments();
+        if (hidden.length) {
+          hidden[0].classList.add('shown');
+          return;
+        }
+        this.showSlide(this.currentSlide + 1);
+      }
+
+      previous() {
+        const shown = [...this.slides[this.currentSlide].querySelectorAll('.fragment.shown')];
+        if (shown.length) {
+          shown[shown.length - 1].classList.remove('shown');
+          return;
+        }
+        this.showSlide(this.currentSlide - 1);
+      }
+
+      showSlide(index) {
+        this.currentSlide = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === this.currentSlide);
+          slide.classList.toggle('visible', i === this.currentSlide);
+          if (i !== this.currentSlide) slide.querySelectorAll('.fragment.shown').forEach(el => el.classList.remove('shown'));
+        });
+        history.replaceState(null, '', `#${this.currentSlide + 1}`);
+        document.getElementById('pageCounter').textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+        document.getElementById('progressFill').style.width = `${((this.currentSlide + 1) / this.slides.length) * 100}%`;
+        [...document.querySelectorAll('#overviewGrid button')].forEach((btn, i) => btn.classList.toggle('current', i === this.currentSlide));
+      }
+
+      buildOverview() {
+        const grid = document.getElementById('overviewGrid');
+        this.slides.forEach((slide, i) => {
+          const btn = document.createElement('button');
+          btn.innerHTML = `<strong>${String(i + 1).padStart(2,'0')}</strong><br>${slide.dataset.title || 'Untitled'}`;
+          btn.addEventListener('click', () => { this.showSlide(i); this.toggleOverview(false); });
+          grid.appendChild(btn);
+        });
+      }
+
+      toggleOverview(force) {
+        const panel = document.getElementById('overview');
+        panel.classList.toggle('open', typeof force === 'boolean' ? force : !panel.classList.contains('open'));
+      }
+
+      setupNavigation() {
+        document.getElementById('nextBtn').addEventListener('click', () => this.next());
+        document.getElementById('prevBtn').addEventListener('click', () => this.previous());
+        document.addEventListener('keydown', event => {
+          if (event.target.getAttribute?.('contenteditable') === 'true') return;
+          if (['ArrowRight','ArrowDown',' ','PageDown'].includes(event.key)) { event.preventDefault(); this.next(); }
+          if (['ArrowLeft','ArrowUp','PageUp'].includes(event.key)) { event.preventDefault(); this.previous(); }
+          if (event.key === 'Home') this.showSlide(0);
+          if (event.key === 'End') this.showSlide(this.slides.length - 1);
+          if (event.key.toLowerCase() === 'o') this.toggleOverview();
+          if (event.key === 'Escape') this.toggleOverview(false);
+        });
+        this.stage.addEventListener('click', event => {
+          if (event.target.closest('button,[contenteditable="true"]')) return;
+          this.next();
+        });
+        this.stage.addEventListener('touchstart', event => { this.touchStartX = event.changedTouches[0].clientX; }, { passive: true });
+        this.stage.addEventListener('touchend', event => {
+          const delta = event.changedTouches[0].clientX - this.touchStartX;
+          if (Math.abs(delta) > 50) delta < 0 ? this.next() : this.previous();
+        }, { passive: true });
+        window.addEventListener('wheel', event => {
+          if (this.wheelLocked || Math.abs(event.deltaY) < 18) return;
+          this.wheelLocked = true;
+          event.deltaY > 0 ? this.next() : this.previous();
+          setTimeout(() => this.wheelLocked = false, 550);
+        }, { passive: true });
+      }
+    }
+
+    /* === INLINE EDITOR: E toggle, local save, Ctrl/Cmd+S download === */
+    class InlineEditor {
+      constructor() {
+        this.isActive = false;
+        this.nodes = [...document.querySelectorAll('[data-editable]')];
+        this.restore();
+        this.setupToggle();
+      }
+      setupToggle() {
+        const hotzone = document.querySelector('.edit-hotzone');
+        const toggle = document.getElementById('editToggle');
+        let hideTimeout = null;
+        const show = () => { clearTimeout(hideTimeout); toggle.classList.add('show'); };
+        const hide = () => { hideTimeout = setTimeout(() => { if (!this.isActive) toggle.classList.remove('show'); }, 400); };
+        hotzone.addEventListener('mouseenter', show); hotzone.addEventListener('mouseleave', hide);
+        toggle.addEventListener('mouseenter', show); toggle.addEventListener('mouseleave', hide);
+        toggle.addEventListener('click', () => this.toggleEditMode());
+        hotzone.addEventListener('click', () => this.toggleEditMode());
+        document.addEventListener('keydown', event => {
+          if ((event.key === 'e' || event.key === 'E') && event.target.getAttribute?.('contenteditable') !== 'true') this.toggleEditMode();
+          if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') { event.preventDefault(); this.download(); }
+        });
+      }
+      toggleEditMode() {
+        this.isActive = !this.isActive;
+        document.body.classList.toggle('editing', this.isActive);
+        document.getElementById('editToggle').classList.toggle('active', this.isActive);
+        this.nodes.forEach((node, index) => {
+          node.contentEditable = this.isActive ? 'true' : 'false';
+          node.oninput = () => localStorage.setItem(`ben-reg-table-edit-${index}`, node.innerHTML);
+        });
+      }
+      restore() {
+        this.nodes.forEach((node, index) => {
+          const saved = localStorage.getItem(`ben-reg-table-edit-${index}`);
+          if (saved) node.innerHTML = saved;
+        });
+      }
+      download() {
+        const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], { type: 'text/html;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = 'ben-regression-table-tutorial-edited.html'; link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      }
+    }
+
+    /* === INTERACTIVE OLS FIT === */
+    const fitStates = {
+      flat: { path: 'M100 205L640 260', sse: '3.48' },
+      steep: { path: 'M100 60L640 400', sse: '1.94' },
+      best: { path: 'M100 105L640 355', sse: '1.00' }
+    };
+    document.querySelectorAll('[data-fit]').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      const state = fitStates[button.dataset.fit];
+      document.getElementById('candidateLine').setAttribute('d', state.path);
+      document.getElementById('sseValue').textContent = state.sse;
+    }));
+
+    /* === REPEATED SAMPLING DEMO === */
+    let sampleDraws = 0;
+    const recentBetas = [];
+    document.getElementById('drawSampleBtn').addEventListener('click', event => {
+      event.stopPropagation();
+      sampleDraws += 1;
+      const beta = -0.23 + (Math.random() - .5) * .22;
+      const y1 = 100 + (beta + .23) * 380;
+      const y2 = 360 - (beta + .23) * 380;
+      const ns = 'http://www.w3.org/2000/svg';
+      const path = document.createElementNS(ns, 'path');
+      path.setAttribute('d', `M100 ${y1.toFixed(1)}L640 ${y2.toFixed(1)}`);
+      path.setAttribute('stroke', ['#c84b49','#397a68','#214e73','#d6a84b'][sampleDraws % 4]);
+      path.setAttribute('stroke-width', '4');
+      path.setAttribute('fill', 'none');
+      document.getElementById('sampleLines').appendChild(path);
+      recentBetas.unshift(beta.toFixed(3)); recentBetas.splice(5);
+      document.getElementById('drawCount').textContent = sampleDraws;
+      document.getElementById('recentBetas').textContent = recentBetas.join('　');
+    });
+
+    /* === PRECISION LAB === */
+    const precisionCopy = {
+      largeN: '样本量更大：偶然抽到“特殊样本”的影响变小，SE 通常下降。',
+      lessNoise: '结果噪声更小：散点更贴近关系线，SE 通常下降。',
+      moreX: 'X 范围更宽：斜率更容易辨认，SE 通常下降。'
+    };
+    document.querySelectorAll('.precision-btn').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      const bars = [...document.querySelectorAll('#precisionBars .bar')];
+      const narrow = [18,54,145,248,145,54,18];
+      bars.forEach((bar, i) => bar.style.height = `${narrow[i]}px`);
+      document.getElementById('precisionLabel').textContent = '抽样分布更窄：标准误更小';
+      document.getElementById('precisionFeedback').textContent = precisionCopy[button.dataset.state];
+    }));
+
+    /* === QUIZZES AND FRAGMENT REVEALS === */
+    document.querySelectorAll('.quiz-option').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      const slide = button.closest('.slide');
+      slide.querySelectorAll('.quiz-option').forEach(item => item.style.opacity = '.48');
+      button.style.opacity = '1';
+      button.style.background = button.dataset.correct === 'true' ? '#397a68' : '#c84b49';
+      slide.querySelectorAll('.answer.fragment').forEach(answer => answer.classList.add('shown'));
+    }));
+    document.getElementById('capstoneReveal').addEventListener('click', event => {
+      event.stopPropagation();
+      event.target.closest('.slide').querySelector('.answer').classList.add('shown');
+    });
+
+    /* === REGRESSION TABLE SPOTLIGHT === */
+    document.querySelectorAll('.table-mode').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      document.getElementById('spotlightTable').dataset.mode = button.dataset.mode;
+    }));
+
+    /* === INITIALIZATION === */
+    window.presentation = new SlidePresentation();
+    window.editor = new InlineEditor();
+  </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+---
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { profile, type Locale, type Section } from '../lib/i18n';
+import '../styles/global.css';
+
+interface Props {
+	locale: Locale;
+	title: string;
+	description: string;
+	currentSection?: Section;
+	alternatePath: string;
+	noindex?: boolean;
+}
+
+const { locale, title, description, currentSection, alternatePath, noindex = false } = Astro.props;
+const site = Astro.site ?? new URL('https://seankoray.github.io');
+const canonical = new URL(Astro.url.pathname, site);
+const currentPath = Astro.url.pathname;
+const enUrl = new URL(locale === 'en' ? currentPath : alternatePath, site);
+const zhUrl = new URL(locale === 'zh' ? currentPath : alternatePath, site);
+const pageTitle = title === 'Ray' ? 'Ray — Economics' : `${title} — Ray`;
+const htmlLang = locale === 'en' ? 'en' : 'zh-CN';
+const ogLocale = locale === 'en' ? 'en_US' : 'zh_CN';
+const skipLabel = locale === 'en' ? 'Skip to content' : '跳至主要内容';
+const structuredData = {
+	'@context': 'https://schema.org',
+	'@type': 'Person',
+	name: profile.name,
+	jobTitle: profile.role.en,
+	affiliation: {
+		'@type': 'CollegeOrUniversity',
+		name: profile.affiliation.en,
+	},
+	knowsAbout: ['Labor economics', 'Development economics', 'Chinese labor market'],
+	url: site.href,
+};
+---
+
+<!doctype html>
+<html lang={htmlLang}>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{pageTitle}</title>
+		<meta name="description" content={description} />
+		<meta name="author" content="Ray" />
+		<meta name="color-scheme" content="light" />
+		<meta name="theme-color" content="#f4f1eb" />
+		{noindex && <meta name="robots" content="noindex" />}
+		<link rel="canonical" href={canonical} />
+		<link rel="alternate" hreflang="en" href={enUrl} />
+		<link rel="alternate" hreflang="zh-CN" href={zhUrl} />
+		<link rel="alternate" hreflang="x-default" href={enUrl} />
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={pageTitle} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:site_name" content="Ray" />
+		<meta property="og:locale" content={ogLocale} />
+		<meta property="og:locale:alternate" content={locale === 'en' ? 'zh_CN' : 'en_US'} />
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:title" content={pageTitle} />
+		<meta name="twitter:description" content={description} />
+		<script is:inline type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+	</head>
+	<body>
+		<a class="skip-link" href="#main-content">{skipLabel}</a>
+		<div class="site-shell">
+			<Header locale={locale} currentSection={currentSection} languageHref={alternatePath} />
+			<main id="main-content">
+				<slot />
+			</main>
+			<Footer locale={locale} />
+		</div>
+	</body>
+</html>

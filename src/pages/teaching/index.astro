@@ -1,0 +1,30 @@
+---
+import CourseCard from '../../components/CourseCard.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCourses } from '../../lib/courses';
+
+const courses = await getCourses();
+---
+
+<BaseLayout
+	locale="en"
+	title="Teaching"
+	description="Teaching by Ray, including a topical course in behavioral economics."
+	currentSection="teaching"
+	alternatePath="/zh/teaching/"
+>
+	<header class="page-header container">
+		<p class="eyebrow">Teaching</p>
+		<h1>Courses and materials.</h1>
+		<p class="page-intro">Course pages bring together topics, notes, and materials for study.</p>
+	</header>
+
+	<section class="section">
+		<div class="section-grid container">
+			<p class="section-label">Courses</p>
+			<div class="course-grid">
+				{courses.map((course, index) => <CourseCard course={course} locale="en" index={index} />)}
+			</div>
+		</div>
+	</section>
+</BaseLayout>

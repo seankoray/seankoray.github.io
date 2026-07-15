@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { courseSlug } from '../lib/courses';
+import { localePath, type Locale } from '../lib/i18n';
+
+interface Props {
+	course: CollectionEntry<'courses'>;
+	locale: Locale;
+	index: number;
+}
+
+const { course, locale, index } = Astro.props;
+const slug = courseSlug(course.id);
+const title = course.data.title[locale];
+const description = course.data.description[locale];
+const href = localePath(locale, `/teaching/${slug}/`);
+const action = locale === 'en' ? 'View course' : '查看课程';
+---
+
+<article class="course-card">
+	<div class="course-card-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+	<div class="course-card-content">
+		<h3><a href={href}>{title}</a></h3>
+		<p>{description}</p>
+		<a class="text-link" href={href}>{action}<span aria-hidden="true"> ↗</span></a>
+	</div>
+</article>

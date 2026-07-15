@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { profile } from '../../lib/i18n';
+---
+
+<BaseLayout
+	locale="zh"
+	title="关于"
+	description="关于中国人民大学经济学博士生Ray。"
+	currentSection="about"
+	alternatePath="/about/"
+>
+	<header class="page-header container">
+		<p class="eyebrow">关于</p>
+		<h1>经济学、劳动与发展。</h1>
+		<p class="page-intro">{profile.research.zh}</p>
+	</header>
+
+	<section class="section">
+		<div class="section-grid container">
+			<p class="section-label">简介</p>
+			<div class="prose">
+				<h2>Ray</h2>
+				<p>Ray是{profile.affiliation.zh}{profile.role.zh}。</p>
+				<p>研究兴趣为{profile.research.zh}</p>
+			</div>
+		</div>
+	</section>
+</BaseLayout>
