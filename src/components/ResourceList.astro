@@ -22,12 +22,13 @@ function materialUrl(path: string) {
 }
 
 function formatDate(value: string) {
-	return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'zh-CN', {
+	const date = new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'zh-CN', {
 		year: 'numeric',
 		month: 'short',
 		day: 'numeric',
 		timeZone: 'UTC',
 	}).format(new Date(`${value}T00:00:00Z`));
+	return locale === 'en' ? `Last updated: ${date}` : `最后更新：${date}`;
 }
 ---
 
